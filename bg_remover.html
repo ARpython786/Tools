@@ -1,1673 +1,1291 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Professional online tool to remove backgrounds from images with pixel-perfect precision. Free, fast, and works directly in your browser.">
-    <meta name="keywords" content="background remover, transparent background, image editor, photo editing, remove bg">
-    <title>ProBG Remover | Professional Image Background Removal Tool</title>
-    <style>
-        /* CSS Reset and Base Styles */
-        :root {
-            --primary-color: #4361ee;
-            --primary-dark: #3a56d4;
-            --secondary-color: #3f37c9;
-            --accent-color: #4895ef;
-            --light-color: #f8f9fa;
-            --dark-color: #212529;
-            --gray-color: #6c757d;
-            --success-color: #4bb543;
-            --warning-color: #f0ad4e;
-            --error-color: #d9534f;
-            --border-radius: 8px;
-            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: var(--dark-color);
-            background-color: #f5f7fa;
-            overflow-x: hidden;
-        }
-
-        /* Header Styles */
-        header {
-            background-color: white;
-            box-shadow: var(--box-shadow);
-            padding: 1rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 700;
-            font-size: 1.5rem;
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        .logo-icon {
-            width: 32px;
-            height: 32px;
-        }
-
-        .ad-container {
-            min-height: 90px;
-            min-width: 728px;
-            background-color: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px dashed #ccc;
-        }
-
-        /* Main Content Styles */
-        main {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-            display: grid;
-            grid-template-columns: 1fr 300px;
-            gap: 2rem;
-        }
-
-        @media (max-width: 768px) {
-            main {
-                grid-template-columns: 1fr;
+// Main application class
+class BackgroundRemover {
+    constructor() {
+        // DOM elements
+        this.uploadZone = document.getElementById('uploadZone');
+        this.fileInput = document.getElementById('fileInput');
+        this.processingArea = document.getElementById('processingArea');
+        this.actionButtons = document.getElementById('actionButtons');
+        this.originalCanvas = document.getElementById('originalCanvas');
+        this.processedCanvas = document.getElementById('processedCanvas');
+        this.smartPreviewToggle = document.getElementById('smartPreviewToggle');
+        this.downloadBtn = document.getElementById('downloadBtn');
+        this.newImageBtn = document.getElementById('newImageBtn');
+        this.loadingOverlay = document.getElementById('loadingOverlay');
+        this.loadingSubtext = document.getElementById('loadingSubtext');
+        this.errorModal = document.getElementById('errorModal');
+        this.errorTitle = document.getElementById('errorTitle');
+        this.errorMessage = document.getElementById('errorMessage');
+        this.tryAgainBtn = document.getElementById('tryAgainBtn');
+        this.uploadNewBtn = document.getElementById('uploadNewBtn');
+        this.modalClose = document.getElementById('modalClose');
+        this.successModal = document.getElementById('successModal');
+        this.successModalClose = document.getElementById('successModalClose');
+        this.downloadNowBtn = document.getElementById('downloadNowBtn');
+        this.editMoreBtn = document.getElementById('editMoreBtn');
+        
+        // Tool elements
+        this.keepBrush = document.getElementById('keepBrush');
+        this.removeBrush = document.getElementById('removeBrush');
+        this.brushSize = document.getElementById('brushSize');
+        this.brushSizeValue = document.getElementById('brushSizeValue');
+        this.edgeSmoothness = document.getElementById('edgeSmoothness');
+        this.edgeSmoothnessValue = document.getElementById('edgeSmoothnessValue');
+        this.edgeFeather = document.getElementById('edgeFeather');
+        this.edgeFeatherValue = document.getElementById('edgeFeatherValue');
+        this.contrast = document.getElementById('contrast');
+        this.contrastValue = document.getElementById('contrastValue');
+        this.watermarkToggle = document.getElementById('watermarkToggle');
+        this.watermarkSettings = document.getElementById('watermarkSettings');
+        this.watermarkText = document.getElementById('watermarkText');
+        this.watermarkColor = document.getElementById('watermarkColor');
+        this.watermarkOpacity = document.getElementById('watermarkOpacity');
+        this.watermarkOpacityValue = document.getElementById('watermarkOpacityValue');
+        this.watermarkTypeRadios = document.querySelectorAll('input[name="watermarkType"]');
+        this.watermarkImageInput = document.getElementById('watermarkImageInput');
+        this.undoBtn = document.getElementById('undoBtn');
+        this.redoBtn = document.getElementById('redoBtn');
+        this.resetBtn = document.getElementById('resetBtn');
+        
+        // Sample images
+        this.sampleImages = document.querySelectorAll('.sample-img');
+        
+        // Canvas contexts
+        this.originalCtx = this.originalCanvas.getContext('2d');
+        this.processedCtx = this.processedCanvas.getContext('2d');
+        
+        // State variables
+        this.currentImage = null;
+        this.originalImageData = null;
+        this.processedImageData = null;
+        this.maskData = null;
+        this.currentTool = 'keep'; // 'keep' or 'remove'
+        this.brushSizeValue = 20;
+        this.zoomLevel = 1;
+        this.zoomOffsetX = 0;
+        this.zoomOffsetY = 0;
+        this.isDragging = false;
+        this.lastX = 0;
+        this.lastY = 0;
+        this.actionHistory = [];
+        this.currentHistoryIndex = -1;
+        this.isProcessing = false;
+        
+        // TensorFlow.js model
+        this.model = null;
+        this.modelLoading = false;
+        
+        // Initialize the application
+        this.initEventListeners();
+        this.loadModel();
+    }
+    
+    // Initialize event listeners
+    initEventListeners() {
+        // Upload zone events
+        this.uploadZone.addEventListener('click', () => this.fileInput.click());
+        this.uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            this.uploadZone.classList.add('dragover');
+        });
+        this.uploadZone.addEventListener('dragleave', () => {
+            this.uploadZone.classList.remove('dragover');
+        });
+        this.uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            this.uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                this.handleFileUpload(e.dataTransfer.files[0]);
             }
-        }
-
-        /* Upload Section */
-        .upload-section {
-            background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .upload-container {
-            border: 2px dashed var(--gray-color);
-            border-radius: var(--border-radius);
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .upload-container:hover {
-            border-color: var(--primary-color);
-            background-color: rgba(67, 97, 238, 0.05);
-        }
-
-        .upload-container.active {
-            border-color: var(--primary-color);
-            background-color: rgba(67, 97, 238, 0.1);
-        }
-
-        .upload-icon {
-            width: 64px;
-            height: 64px;
-            margin-bottom: 1rem;
-            color: var(--gray-color);
-        }
-
-        .upload-title {
-            font-size: 1.25rem;
-            margin-bottom: 0.5rem;
-            color: var(--dark-color);
-        }
-
-        .upload-subtitle {
-            color: var(--gray-color);
-            margin-bottom: 1rem;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            cursor: pointer;
-            transition: var(--transition);
-            text-decoration: none;
-        }
-
-        .btn:hover {
-            background-color: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background-color: white;
-            color: var(--primary-color);
-            border: 1px solid var(--primary-color);
-        }
-
-        .btn-secondary:hover {
-            background-color: rgba(67, 97, 238, 0.1);
-        }
-
-        .btn-disabled {
-            background-color: var(--gray-color);
-            cursor: not-allowed;
-        }
-
-        .btn-disabled:hover {
-            transform: none;
-            background-color: var(--gray-color);
-        }
-
-        /* Preview Section */
-        .preview-section {
-            background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .preview-title {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .preview-toggle {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 24px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .toggle-slider {
-            background-color: var(--primary-color);
-        }
-
-        input:checked + .toggle-slider:before {
-            transform: translateX(26px);
-        }
-
-        .preview-container {
-            position: relative;
-            width: 100%;
-            height: 400px;
-            border: 1px solid #eee;
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AkEEjIZFQpIYQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAJUlEQVQ4y2NgGAWjYBSMglEwCkbBKBgY8D8QbQzEwQZGAQMAJXQBZ1ZtB3QAAAAASUVORK5CYII=');
-            background-repeat: repeat;
-            margin-bottom: 1rem;
-        }
-
-        .canvas-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        canvas {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .preview-slider {
-            width: 100%;
-            height: 40px;
-            position: relative;
-            margin-bottom: 1rem;
-        }
-
-        .slider-track {
-            width: 100%;
-            height: 4px;
-            background-color: #ddd;
-            border-radius: 2px;
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        .slider-thumb {
-            width: 20px;
-            height: 20px;
-            background-color: var(--primary-color);
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            cursor: grab;
-        }
-
-        .slider-thumb:active {
-            cursor: grabbing;
-        }
-
-        /* Tools Section */
-        .tools-section {
-            background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 2rem;
-        }
-
-        .tools-title {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
-        }
-
-        .tool-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .tool-group-title {
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
-            color: var(--gray-color);
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .tool-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 1rem;
-        }
-
-        .tool-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 0.75rem;
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .tool-btn:hover {
-            border-color: var(--primary-color);
-            background-color: rgba(67, 97, 238, 0.05);
-        }
-
-        .tool-btn.active {
-            border-color: var(--primary-color);
-            background-color: rgba(67, 97, 238, 0.1);
-        }
-
-        .tool-icon {
-            width: 24px;
-            height: 24px;
-            margin-bottom: 0.5rem;
-            color: var(--gray-color);
-        }
-
-        .tool-btn.active .tool-icon {
-            color: var(--primary-color);
-        }
-
-        .tool-label {
-            font-size: 0.875rem;
-            text-align: center;
-        }
-
-        .slider-container {
-            margin-bottom: 1rem;
-        }
-
-        .slider-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-        }
-
-        .range-slider {
-            width: 100%;
-            height: 4px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: #ddd;
-            border-radius: 2px;
-            outline: none;
-        }
-
-        .range-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            background: var(--primary-color);
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-        .range-slider::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
-            background: var(--primary-color);
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-        .action-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        /* Sidebar Styles */
-        aside {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-
-        .sidebar-section {
-            background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 1.5rem;
-        }
-
-        .sidebar-title {
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            color: var(--dark-color);
-        }
-
-        .tips-list {
-            list-style-type: none;
-        }
-
-        .tips-list li {
-            margin-bottom: 0.75rem;
-            padding-left: 1.5rem;
-            position: relative;
-        }
-
-        .tips-list li:before {
-            content: "•";
-            color: var(--primary-color);
-            font-size: 1.5rem;
-            position: absolute;
-            left: 0;
-            top: -2px;
-        }
-
-        .sidebar-ad {
-            min-height: 250px;
-            background-color: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px dashed #ccc;
-        }
-
-        /* Footer Styles */
-        footer {
-            background-color: var(--dark-color);
-            color: white;
-            padding: 2rem;
-            margin-top: 3rem;
-        }
-
-        .footer-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
-        }
-
-        .footer-logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 700;
-            font-size: 1.25rem;
-            color: white;
-            text-decoration: none;
-            margin-bottom: 1rem;
-        }
-
-        .footer-logo-icon {
-            width: 24px;
-            height: 24px;
-        }
-
-        .footer-description {
-            color: #adb5bd;
-            margin-bottom: 1rem;
-        }
-
-        .footer-links-title {
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            color: white;
-        }
-
-        .footer-links {
-            list-style-type: none;
-        }
-
-        .footer-links li {
-            margin-bottom: 0.5rem;
-        }
-
-        .footer-links a {
-            color: #adb5bd;
-            text-decoration: none;
-            transition: var(--transition);
-        }
-
-        .footer-links a:hover {
-            color: white;
-        }
-
-        .footer-bottom {
-            max-width: 1200px;
-            margin: 2rem auto 0;
-            padding-top: 1rem;
-            border-top: 1px solid #495057;
-            display: flex;
-            justify-content: space-between;
-            color: #adb5bd;
-            font-size: 0.875rem;
-        }
-
-        /* Loading Indicator */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: var(--transition);
-        }
-
-        .loading-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            color: white;
-            margin-top: 1rem;
-            text-align: center;
-        }
-
-        /* Toast Notification */
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: var(--dark-color);
-            color: white;
-            padding: 1rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            transform: translateY(100px);
-            opacity: 0;
-            transition: var(--transition);
-            z-index: 1000;
-        }
-
-        .toast.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        .toast.success {
-            background-color: var(--success-color);
-        }
-
-        .toast.error {
-            background-color: var(--error-color);
-        }
-
-        .toast.warning {
-            background-color: var(--warning-color);
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 992px) {
-            .header-container {
-                flex-direction: column;
-                gap: 1rem;
+        });
+        
+        // File input change
+        this.fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                this.handleFileUpload(e.target.files[0]);
             }
-
-            .ad-container {
-                min-width: 100%;
-                min-height: 60px;
+        });
+        
+        // Sample images
+        this.sampleImages.forEach(img => {
+            img.addEventListener('click', (e) => {
+                const sample = e.target.getAttribute('data-sample');
+                this.loadSampleImage(sample);
+            });
+        });
+        
+        // Smart preview toggle
+        this.smartPreviewToggle.addEventListener('change', () => {
+            this.updateCanvasPreview();
+        });
+        
+        // Download button
+        this.downloadBtn.addEventListener('click', () => this.downloadImage());
+        this.downloadNowBtn.addEventListener('click', () => this.downloadImage());
+        
+        // New image button
+        this.newImageBtn.addEventListener('click', () => this.resetTool());
+        this.uploadNewBtn.addEventListener('click', () => {
+            this.errorModal.classList.add('hidden');
+            this.resetTool();
+        });
+        this.editMoreBtn.addEventListener('click', () => {
+            this.successModal.classList.add('hidden');
+        });
+        
+        // Try again button
+        this.tryAgainBtn.addEventListener('click', () => {
+            this.errorModal.classList.add('hidden');
+            this.processImageWithFallback();
+        });
+        
+        // Modal close buttons
+        this.modalClose.addEventListener('click', () => {
+            this.errorModal.classList.add('hidden');
+        });
+        this.successModalClose.addEventListener('click', () => {
+            this.successModal.classList.add('hidden');
+        });
+        
+        // Tool buttons
+        this.keepBrush.addEventListener('click', () => {
+            this.currentTool = 'keep';
+            this.keepBrush.classList.add('active');
+            this.removeBrush.classList.remove('active');
+        });
+        
+        this.removeBrush.addEventListener('click', () => {
+            this.currentTool = 'remove';
+            this.removeBrush.classList.add('active');
+            this.keepBrush.classList.remove('active');
+        });
+        
+        // Brush size slider
+        this.brushSize.addEventListener('input', (e) => {
+            this.brushSizeValue = e.target.value;
+            this.brushSizeValue.textContent = this.brushSizeValue;
+        });
+        
+        // Edge refinement sliders
+        this.edgeSmoothness.addEventListener('input', (e) => {
+            this.edgeSmoothnessValue.textContent = e.target.value;
+            this.applyEdgeRefinement();
+        });
+        
+        this.edgeFeather.addEventListener('input', (e) => {
+            this.edgeFeatherValue.textContent = e.target.value;
+            this.applyEdgeRefinement();
+        });
+        
+        this.contrast.addEventListener('input', (e) => {
+            this.contrastValue.textContent = e.target.value;
+            this.applyEdgeRefinement();
+        });
+        
+        // Watermark toggle
+        this.watermarkToggle.addEventListener('change', () => {
+            this.watermarkSettings.classList.toggle('hidden', !this.watermarkToggle.checked);
+            this.updateCanvasPreview();
+        });
+        
+        // Watermark type change
+        this.watermarkTypeRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                document.querySelector('.watermark-text-settings').classList.toggle('hidden', radio.value !== 'text');
+                document.querySelector('.watermark-image-settings').classList.toggle('hidden', radio.value !== 'image');
+                this.updateCanvasPreview();
+            });
+        });
+        
+        // Watermark settings changes
+        this.watermarkText.addEventListener('input', () => this.updateCanvasPreview());
+        this.watermarkColor.addEventListener('input', () => this.updateCanvasPreview());
+        this.watermarkOpacity.addEventListener('input', (e) => {
+            this.watermarkOpacityValue.textContent = `${e.target.value}%`;
+            this.updateCanvasPreview();
+        });
+        this.watermarkImageInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                this.loadWatermarkImage(e.target.files[0]);
             }
-        }
-
-        @media (max-width: 768px) {
-            .upload-container {
-                padding: 1.5rem;
+        });
+        
+        // Undo/redo/reset buttons
+        this.undoBtn.addEventListener('click', () => this.undoAction());
+        this.redoBtn.addEventListener('click', () => this.redoAction());
+        this.resetBtn.addEventListener('click', () => this.resetMask());
+        
+        // Canvas mouse events for brushing
+        this.processedCanvas.addEventListener('mousedown', (e) => {
+            if (!this.processedImageData) return;
+            
+            this.isDragging = true;
+            this.lastX = e.offsetX;
+            this.lastY = e.offsetY;
+            this.applyBrush(e.offsetX, e.offsetY);
+            
+            // Save state for undo
+            this.saveState();
+        });
+        
+        this.processedCanvas.addEventListener('mousemove', (e) => {
+            if (!this.isDragging || !this.processedImageData) return;
+            
+            this.applyBrush(e.offsetX, e.offsetY);
+            this.lastX = e.offsetX;
+            this.lastY = e.offsetY;
+        });
+        
+        this.processedCanvas.addEventListener('mouseup', () => {
+            this.isDragging = false;
+        });
+        
+        this.processedCanvas.addEventListener('mouseleave', () => {
+            this.isDragging = false;
+        });
+        
+        // Touch events for mobile
+        this.processedCanvas.addEventListener('touchstart', (e) => {
+            if (!this.processedImageData) return;
+            
+            e.preventDefault();
+            const rect = this.processedCanvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            
+            this.isDragging = true;
+            this.lastX = x;
+            this.lastY = y;
+            this.applyBrush(x, y);
+            
+            // Save state for undo
+            this.saveState();
+        });
+        
+        this.processedCanvas.addEventListener('touchmove', (e) => {
+            if (!this.isDragging || !this.processedImageData) return;
+            
+            e.preventDefault();
+            const rect = this.processedCanvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            
+            this.applyBrush(x, y);
+            this.lastX = x;
+            this.lastY = y;
+        });
+        
+        this.processedCanvas.addEventListener('touchend', () => {
+            this.isDragging = false;
+        });
+        
+        // Zoom controls
+        document.querySelector('.zoom-in').addEventListener('click', () => this.adjustZoom(1.2));
+        document.querySelector('.zoom-out').addEventListener('click', () => this.adjustZoom(0.8));
+        document.querySelector('.zoom-reset').addEventListener('click', () => this.resetZoom());
+        
+        // Panning
+        this.processedCanvas.addEventListener('mousedown', (e) => {
+            if (e.button === 1 || (e.button === 0 && e.ctrlKey)) { // Middle mouse or Ctrl+Left mouse
+                e.preventDefault();
+                this.isDragging = true;
+                this.lastX = e.clientX;
+                this.lastY = e.clientY;
+                this.processedCanvas.style.cursor = 'grabbing';
             }
-
-            .preview-container {
-                height: 300px;
-            }
-
-            .action-buttons {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 576px) {
-            header {
-                padding: 1rem;
-            }
-
-            .upload-section, .preview-section, .tools-section, .sidebar-section {
-                padding: 1.5rem;
-            }
-
-            .preview-container {
-                height: 250px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <!-- Header Section -->
-    <header>
-        <div class="header-container">
-            <a href="#" class="logo" aria-label="ProBG Remover Home">
-                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M4 8L8 4M8 4L12 8M8 4V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M20 16L16 20M16 20L12 16M16 20V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                ProBG Remover
-            </a>
-            <div class="ad-container" aria-label="Advertisement">
-                <!-- Insert AdSense Code Here -->
-                Advertisement
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main>
-        <article>
-            <!-- Upload Section -->
-            <section class="upload-section" aria-labelledby="upload-title">
-                <h2 id="upload-title" class="visually-hidden">Upload Image</h2>
-                <div class="upload-container" id="uploadContainer" tabindex="0" role="button" aria-label="Upload image">
-                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 15V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M17 8L12 3L7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M12 3V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <h3 class="upload-title">Drag & Drop Your Image Here</h3>
-                    <p class="upload-subtitle">or click to browse files (PNG, JPG, JPEG up to 10MB)</p>
-                    <button class="btn" id="uploadBtn">Select Image</button>
-                    <input type="file" id="fileInput" accept="image/png, image/jpeg, image/jpg" style="display: none;">
-                </div>
-            </section>
-
-            <!-- Preview Section -->
-            <section class="preview-section" aria-labelledby="preview-title" style="display: none;" id="previewSection">
-                <div class="preview-title">
-                    <h2 id="preview-title">Preview</h2>
-                    <div class="preview-toggle">
-                        <span>Original</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="previewToggle">
-                            <span class="toggle-slider"></span>
-                        </label>
-                        <span>Result</span>
-                    </div>
-                </div>
-                <div class="preview-container">
-                    <div class="canvas-container">
-                        <canvas id="originalCanvas"></canvas>
-                        <canvas id="resultCanvas" style="display: none;"></canvas>
-                    </div>
-                </div>
-                <div class="preview-slider" style="display: none;" id="previewSlider">
-                    <div class="slider-track"></div>
-                    <div class="slider-thumb" id="sliderThumb"></div>
-                </div>
-            </section>
-
-            <!-- Tools Section -->
-            <section class="tools-section" aria-labelledby="tools-title" style="display: none;" id="toolsSection">
-                <h2 id="tools-title">Refinement Tools</h2>
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (this.isDragging && (e.buttons === 4 || (e.buttons === 1 && e.ctrlKey))) {
+                e.preventDefault();
+                const dx = e.clientX - this.lastX;
+                const dy = e.clientY - this.lastY;
                 
-                <div class="tool-group">
-                    <h3 class="tool-group-title">Selection Tools</h3>
-                    <div class="tool-options">
-                        <button class="tool-btn" id="keepTool" aria-label="Keep tool">
-                            <svg class="tool-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M8 12L11 15L16 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <span class="tool-label">Keep</span>
-                        </button>
-                        <button class="tool-btn" id="removeTool" aria-label="Remove tool">
-                            <svg class="tool-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <span class="tool-label">Remove</span>
-                        </button>
-                        <button class="tool-btn" id="brushTool" aria-label="Brush tool">
-                            <svg class="tool-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M20.71 4.04L19.96 3.29C19.5784 2.90733 19.0083 2.75422 18.48 2.88L12 4L19 11L20.12 5.52C20.2533 4.99166 20.0927 4.42158 19.71 4.04H20.71Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M11 13L9 21L5 17L11 13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M13 11L17 7L13 3L9 7L13 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <span class="tool-label">Brush</span>
-                        </button>
-                        <button class="tool-btn" id="eraserTool" aria-label="Eraser tool">
-                            <svg class="tool-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M7 21H17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M15.5 7.5L11 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M13 15L8.5 10.5L3 16C2 17 2.5 18.5 4 19C5.5 19.5 7 19 8 18L13 15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M12 7.5L16.5 3C17.5 2 19 2.5 19.5 4C20 5.5 19.5 7 18.5 8L14 12.5L12 7.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <span class="tool-label">Eraser</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="tool-group">
-                    <h3 class="tool-group-title">Brush Settings</h3>
-                    <div class="slider-container">
-                        <div class="slider-label">
-                            <span>Size</span>
-                            <span id="brushSizeValue">20</span>
-                        </div>
-                        <input type="range" min="1" max="100" value="20" class="range-slider" id="brushSizeSlider">
-                    </div>
-                    <div class="slider-container">
-                        <div class="slider-label">
-                            <span>Hardness</span>
-                            <span id="brushHardnessValue">80%</span>
-                        </div>
-                        <input type="range" min="0" max="100" value="80" class="range-slider" id="brushHardnessSlider">
-                    </div>
-                </div>
-
-                <div class="tool-group">
-                    <h3 class="tool-group-title">Edge Refinement</h3>
-                    <div class="slider-container">
-                        <div class="slider-label">
-                            <span>Smoothness</span>
-                            <span id="smoothnessValue">50%</span>
-                        </div>
-                        <input type="range" min="0" max="100" value="50" class="range-slider" id="smoothnessSlider">
-                    </div>
-                    <div class="slider-container">
-                        <div class="slider-label">
-                            <span>Feather</span>
-                            <span id="featherValue">10%</span>
-                        </div>
-                        <input type="range" min="0" max="100" value="10" class="range-slider" id="featherSlider">
-                    </div>
-                </div>
-
-                <div class="tool-group">
-                    <h3 class="tool-group-title">Advanced</h3>
-                    <div class="slider-container">
-                        <div class="slider-label">
-                            <span>Tolerance</span>
-                            <span id="toleranceValue">30%</span>
-                        </div>
-                        <input type="range" min="0" max="100" value="30" class="range-slider" id="toleranceSlider">
-                    </div>
-                    <div class="slider-container">
-                        <div class="slider-label">
-                            <span>Contrast</span>
-                            <span id="contrastValue">20%</span>
-                        </div>
-                        <input type="range" min="0" max="100" value="20" class="range-slider" id="contrastSlider">
-                    </div>
-                </div>
-
-                <div class="action-buttons">
-                    <button class="btn btn-secondary" id="undoBtn" disabled aria-label="Undo last action">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M5 15H12C14.1217 15 16.1566 14.1571 17.6569 12.6569C19.1571 11.1566 20 9.12173 20 7C20 4.87827 19.1571 2.84344 17.6569 1.34315C16.1566 -0.157145 14.1217 -1 12 -1C9.87827 -1 7.84344 -0.157145 6.34315 1.34315C5.26829 2.41802 4.58835 3.82243 4.3999 5.33333" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M3 8L5.33333 5.33333L8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        Undo
-                    </button>
-                    <button class="btn btn-secondary" id="redoBtn" disabled aria-label="Redo last action">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M19 15H12C9.87827 15 7.84344 14.1571 6.34315 12.6569C4.84285 11.1566 4 9.12173 4 7C4 4.87827 4.84285 2.84344 6.34315 1.34315C7.84344 -0.157145 9.87827 -1 12 -1C14.1217 -1 16.1566 -0.157145 17.6569 1.34315C18.7317 2.41802 19.4117 3.82243 19.6001 5.33333" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M21 8L18.6667 5.33333L16 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        Redo
-                    </button>
-                    <button class="btn btn-secondary" id="resetBtn" aria-label="Reset image">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M14 22C14 22 14.5 21.5 14.5 17.5C14.5 13.5 14 10 14 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M10 2C10 2 9.5 2.5 9.5 6.5C9.5 10.5 10 14 10 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M18 8C18 8 20 9 20 12C20 15 18 16 18 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M6 16C6 16 4 15 4 12C4 9 6 8 6 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M2 20C2 20 4 22 6 22C8 22 14 22 14 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M22 4C22 4 20 2 18 2C16 2 10 2 10 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        Reset
-                    </button>
-                    <button class="btn" id="downloadBtn" aria-label="Download image">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M21 15V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        Download PNG
-                    </button>
-                </div>
-            </section>
-        </article>
-
-        <!-- Sidebar -->
-        <aside>
-            <section class="sidebar-section" aria-labelledby="tips-title">
-                <h2 id="tips-title" class="sidebar-title">Tips for Best Results</h2>
-                <ul class="tips-list">
-                    <li>Use high-quality, well-lit images for best results</li>
-                    <li>For complex edges (hair, fur), use the brush tool to refine</li>
-                    <li>Adjust tolerance for better edge detection</li>
-                    <li>Use the preview slider to compare before/after</li>
-                    <li>Zoom in for detailed refinements</li>
-                </ul>
-            </section>
-
-            <section class="sidebar-section" aria-labelledby="watermark-title">
-                <h2 id="watermark-title" class="sidebar-title">Watermark Settings</h2>
-                <div class="slider-container">
-                    <div class="slider-label">
-                        <span>Opacity</span>
-                        <span id="watermarkOpacityValue">50%</span>
-                    </div>
-                    <input type="range" min="0" max="100" value="50" class="range-slider" id="watermarkOpacitySlider">
-                </div>
-                <div style="margin-top: 1rem;">
-                    <label for="watermarkText" class="visually-hidden">Watermark Text</label>
-                    <input type="text" id="watermarkText" placeholder="Enter watermark text" class="input-field" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: var(--border-radius);">
-                </div>
-                <div style="margin-top: 1rem;">
-                    <label class="toggle-switch" style="display: flex; align-items: center; gap: 0.5rem;">
-                        <input type="checkbox" id="watermarkToggle">
-                        <span class="toggle-slider"></span>
-                        <span>Enable Watermark</span>
-                    </label>
-                </div>
-            </section>
-
-            <div class="sidebar-ad" aria-label="Advertisement">
-                <!-- Insert AdSense Code Here -->
-                Advertisement
-            </div>
-        </aside>
-    </main>
-
-    <!-- Footer -->
-    <footer>
-        <div class="footer-container">
-            <div>
-                <a href="#" class="footer-logo">
-                    <svg class="footer-logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4 8L8 4M8 4L12 8M8 4V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M20 16L16 20M16 20L12 16M16 20V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    ProBG Remover
-                </a>
-                <p class="footer-description">
-                    Professional online tool to remove backgrounds from images with pixel-perfect precision. Free, fast, and works directly in your browser.
-                </p>
-            </div>
-            <div>
-                <h3 class="footer-links-title">Quick Links</h3>
-                <ul class="footer-links">
-                    <li><a href="#">Home</a></li>
-                    <li><a href="#">How It Works</a></li>
-                    <li><a href="#">Examples</a></li>
-                    <li><a href="#">Pricing</a></li>
-                    <li><a href="#">API</a></li>
-                </ul>
-            </div>
-            <div>
-                <h3 class="footer-links-title">Resources</h3>
-                <ul class="footer-links">
-                    <li><a href="#">Help Center</a></li>
-                    <li><a href="#">Blog</a></li>
-                    <li><a href="#">Tutorials</a></li>
-                    <li><a href="#">Privacy Policy</a></li>
-                    <li><a href="#">Terms of Service</a></li>
-                </ul>
-            </div>
-            <div>
-                <h3 class="footer-links-title">Connect</h3>
-                <ul class="footer-links">
-                    <li><a href="#">Contact Us</a></li>
-                    <li><a href="#">Twitter</a></li>
-                    <li><a href="#">Facebook</a></li>
-                    <li><a href="#">Instagram</a></li>
-                    <li><a href="#">GitHub</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <span>&copy; 2023 ProBG Remover. All rights reserved.</span>
-            <span>Made with ❤️ for creators</span>
-        </div>
-    </footer>
-
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div>
-            <div class="loading-spinner"></div>
-            <p class="loading-text" id="loadingText">Processing your image...</p>
-        </div>
-    </div>
-
-    <!-- Toast Notification -->
-    <div class="toast" id="toast"></div>
-
-    <!-- Hidden Canvas for Processing -->
-    <canvas id="hiddenCanvas" style="display: none;"></canvas>
-
-    <script>
-        // Main Application Class
-        class BackgroundRemover {
-            constructor() {
-                // DOM Elements
-                this.uploadContainer = document.getElementById('uploadContainer');
-                this.uploadBtn = document.getElementById('uploadBtn');
-                this.fileInput = document.getElementById('fileInput');
-                this.previewSection = document.getElementById('previewSection');
-                this.toolsSection = document.getElementById('toolsSection');
-                this.originalCanvas = document.getElementById('originalCanvas');
-                this.resultCanvas = document.getElementById('resultCanvas');
-                this.previewToggle = document.getElementById('previewToggle');
-                this.previewSlider = document.getElementById('previewSlider');
-                this.sliderThumb = document.getElementById('sliderThumb');
-                this.hiddenCanvas = document.getElementById('hiddenCanvas');
-                this.undoBtn = document.getElementById('undoBtn');
-                this.redoBtn = document.getElementById('redoBtn');
-                this.resetBtn = document.getElementById('resetBtn');
-                this.downloadBtn = document.getElementById('downloadBtn');
-                this.loadingOverlay = document.getElementById('loadingOverlay');
-                this.loadingText = document.getElementById('loadingText');
-                this.toast = document.getElementById('toast');
+                this.zoomOffsetX += dx;
+                this.zoomOffsetY += dy;
                 
-                // Tool Elements
-                this.keepTool = document.getElementById('keepTool');
-                this.removeTool = document.getElementById('removeTool');
-                this.brushTool = document.getElementById('brushTool');
-                this.eraserTool = document.getElementById('eraserTool');
+                this.lastX = e.clientX;
+                this.lastY = e.clientY;
                 
-                // Slider Elements
-                this.brushSizeSlider = document.getElementById('brushSizeSlider');
-                this.brushSizeValue = document.getElementById('brushSizeValue');
-                this.brushHardnessSlider = document.getElementById('brushHardnessSlider');
-                this.brushHardnessValue = document.getElementById('brushHardnessValue');
-                this.smoothnessSlider = document.getElementById('smoothnessSlider');
-                this.smoothnessValue = document.getElementById('smoothnessValue');
-                this.featherSlider = document.getElementById('featherSlider');
-                this.featherValue = document.getElementById('featherValue');
-                this.toleranceSlider = document.getElementById('toleranceSlider');
-                this.toleranceValue = document.getElementById('toleranceValue');
-                this.contrastSlider = document.getElementById('contrastSlider');
-                this.contrastValue = document.getElementById('contrastValue');
-                this.watermarkOpacitySlider = document.getElementById('watermarkOpacitySlider');
-                this.watermarkOpacityValue = document.getElementById('watermarkOpacityValue');
-                this.watermarkToggle = document.getElementById('watermarkToggle');
-                this.watermarkText = document.getElementById('watermarkText');
-                
-                // Application State
-                this.state = {
-                    originalImage: null,
-                    processedImage: null,
-                    maskData: null,
-                    canvasSize: { width: 0, height: 0 },
-                    activeTool: null,
-                    brushSize: 20,
-                    brushHardness: 80,
-                    tolerance: 30,
-                    contrast: 20,
-                    smoothness: 50,
-                    feather: 10,
-                    history: [],
-                    historyIndex: -1,
-                    watermark: {
-                        enabled: false,
-                        text: 'ProBG Remover',
-                        opacity: 50
-                    }
-                };
-                
-                // Initialize the application
-                this.init();
+                this.updateCanvasPreview();
+            }
+        });
+        
+        document.addEventListener('mouseup', () => {
+            if (this.isDragging) {
+                this.isDragging = false;
+                this.processedCanvas.style.cursor = '';
+            }
+        });
+    }
+    
+    // Load TensorFlow.js model
+    async loadModel() {
+        if (this.modelLoading || this.model) return;
+        
+        this.modelLoading = true;
+        this.loadingSubtext.textContent = 'Loading AI model...';
+        
+        try {
+            // Load BodyPix model - good for person segmentation
+            // For general purpose, you might want to use a different model
+            this.model = await bodyPix.load({
+                architecture: 'MobileNetV1',
+                outputStride: 16,
+                multiplier: 0.75,
+                quantBytes: 2
+            });
+            
+            console.log('Model loaded successfully');
+        } catch (error) {
+            console.error('Error loading model:', error);
+            this.showError('Model Loading Failed', 'The AI model failed to load. The tool will use a simpler method for background removal.');
+        } finally {
+            this.modelLoading = false;
+        }
+    }
+    
+    // Handle file upload
+    async handleFileUpload(file) {
+        // Validate file
+        if (!file.type.match('image.*')) {
+            this.showError('Invalid File', 'Please upload an image file (JPG, PNG, or WEBP).');
+            return;
+        }
+        
+        if (file.size > 25 * 1024 * 1024) { // 25MB limit
+            this.showError('File Too Large', 'Please upload an image smaller than 25MB.');
+            return;
+        }
+        
+        // Show loading state
+        this.showLoading('Processing your image...');
+        
+        try {
+            // Read the image file
+            const img = await this.loadImageFile(file);
+            this.currentImage = img;
+            
+            // Set canvas dimensions
+            this.setCanvasDimensions(img.width, img.height);
+            
+            // Draw original image
+            this.originalCtx.drawImage(img, 0, 0);
+            this.originalImageData = this.originalCtx.getImageData(0, 0, this.originalCanvas.width, this.originalCanvas.height);
+            
+            // Process the image to remove background
+            await this.processImage();
+            
+            // Show the processing area
+            this.uploadZone.classList.add('hidden');
+            this.processingArea.classList.remove('hidden');
+            this.actionButtons.classList.remove('hidden');
+            
+            // Reset zoom
+            this.resetZoom();
+            
+            // Hide loading
+            this.hideLoading();
+        } catch (error) {
+            console.error('Error processing image:', error);
+            this.hideLoading();
+            this.showError('Processing Error', 'There was an error processing your image. Please try again with a different image.');
+        }
+    }
+    
+    // Load image file
+    loadImageFile(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = e.target.result;
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+    
+    // Set canvas dimensions
+    setCanvasDimensions(imgWidth, imgHeight) {
+        // Calculate dimensions to fit in the preview area while maintaining aspect ratio
+        const maxWidth = window.innerWidth > 768 ? 600 : 300;
+        const maxHeight = 400;
+        
+        let width = imgWidth;
+        let height = imgHeight;
+        
+        if (width > maxWidth) {
+            const ratio = maxWidth / width;
+            width = maxWidth;
+            height = height * ratio;
+        }
+        
+        if (height > maxHeight) {
+            const ratio = maxHeight / height;
+            height = maxHeight;
+            width = width * ratio;
+        }
+        
+        // Set canvas dimensions
+        this.originalCanvas.width = width;
+        this.originalCanvas.height = height;
+        this.processedCanvas.width = width;
+        this.processedCanvas.height = height;
+    }
+    
+    // Process image to remove background
+    async processImage() {
+        if (!this.currentImage) return;
+        
+        this.isProcessing = true;
+        
+        try {
+            // Try with AI first
+            await this.processImageWithAI();
+            
+            // If AI fails, fall back to simpler method
+            if (!this.processedImageData) {
+                await this.processImageWithFallback();
             }
             
-            init() {
-                // Event Listeners
-                this.setupEventListeners();
+            // Update the canvas preview
+            this.updateCanvasPreview();
+            
+            // Save initial state for undo/redo
+            this.saveState();
+        } catch (error) {
+            console.error('Error in processImage:', error);
+            throw error;
+        } finally {
+            this.isProcessing = false;
+        }
+    }
+    
+    // Process image using AI (TensorFlow.js)
+    async processImageWithAI() {
+        if (!this.model) {
+            console.log('AI model not loaded, using fallback method');
+            return this.processImageWithFallback();
+        }
+        
+        try {
+            // Perform segmentation
+            const segmentation = await this.model.segmentPerson(this.currentImage, {
+                flipHorizontal: false,
+                internalResolution: 'high',
+                segmentationThreshold: 0.7,
+                maxDetections: 1
+            });
+            
+            // Create mask from segmentation
+            const mask = segmentation.data;
+            const width = segmentation.width;
+            const height = segmentation.height;
+            
+            // Create a new ImageData for the processed image
+            const originalData = this.originalImageData.data;
+            const processedData = new Uint8ClampedArray(originalData.length);
+            
+            // Apply mask to create transparent background
+            for (let i = 0; i < mask.length; i++) {
+                const pixelPos = i * 4;
                 
-                // Initialize tools
-                this.setActiveTool('brush');
+                if (mask[i] === 1) { // Person (keep)
+                    processedData[pixelPos] = originalData[pixelPos];     // R
+                    processedData[pixelPos + 1] = originalData[pixelPos + 1]; // G
+                    processedData[pixelPos + 2] = originalData[pixelPos + 2]; // B
+                    processedData[pixelPos + 3] = 255; // A (fully opaque)
+                } else { // Background (remove)
+                    processedData[pixelPos] = 0;     // R
+                    processedData[pixelPos + 1] = 0; // G
+                    processedData[pixelPos + 2] = 0; // B
+                    processedData[pixelPos + 3] = 0; // A (fully transparent)
+                }
             }
             
-            setupEventListeners() {
-                // Upload Events
-                this.uploadContainer.addEventListener('click', () => this.fileInput.click());
-                this.uploadContainer.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    this.uploadContainer.classList.add('active');
-                });
-                this.uploadContainer.addEventListener('dragleave', () => {
-                    this.uploadContainer.classList.remove('active');
-                });
-                this.uploadContainer.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    this.uploadContainer.classList.remove('active');
-                    if (e.dataTransfer.files.length) {
-                        this.handleFileUpload(e.dataTransfer.files[0]);
-                    }
-                });
-                this.fileInput.addEventListener('change', () => {
-                    if (this.fileInput.files.length) {
-                        this.handleFileUpload(this.fileInput.files[0]);
-                    }
-                });
-                this.uploadBtn.addEventListener('click', () => this.fileInput.click());
+            // Store the processed image data
+            this.processedImageData = new ImageData(processedData, width, height);
+            this.maskData = new Uint8Array(mask);
+            
+            return true;
+        } catch (error) {
+            console.error('AI processing failed:', error);
+            return false;
+        }
+    }
+    
+    // Process image using simpler color-based method
+    async processImageWithFallback() {
+        if (!this.currentImage) return;
+        
+        try {
+            const originalData = this.originalImageData.data;
+            const processedData = new Uint8ClampedArray(originalData.length);
+            const maskData = new Uint8Array(originalData.length / 4);
+            
+            // Simple background removal based on color difference from edges
+            // This is a simplified approach - in a real app you'd want something more sophisticated
+            
+            // Sample edge colors to determine likely background
+            const edgeColors = this.sampleEdgeColors(originalData, this.originalImageData.width, this.originalImageData.height);
+            
+            // Calculate average edge color
+            const avgColor = this.calculateAverageColor(edgeColors);
+            
+            // Threshold for background detection
+            const threshold = 30;
+            
+            // Create mask
+            for (let i = 0; i < originalData.length; i += 4) {
+                const r = originalData[i];
+                const g = originalData[i + 1];
+                const b = originalData[i + 2];
                 
-                // Preview Toggle
-                this.previewToggle.addEventListener('change', () => {
-                    if (this.previewToggle.checked) {
-                        this.originalCanvas.style.display = 'none';
-                        this.resultCanvas.style.display = 'block';
+                // Calculate color difference from average edge color
+                const diff = Math.sqrt(
+                    Math.pow(r - avgColor.r, 2) +
+                    Math.pow(g - avgColor.g, 2) +
+                    Math.pow(b - avgColor.b, 2)
+                );
+                
+                const maskPos = i / 4;
+                
+                if (diff < threshold) {
+                    // Background - make transparent
+                    processedData[i] = 0;
+                    processedData[i + 1] = 0;
+                    processedData[i + 2] = 0;
+                    processedData[i + 3] = 0;
+                    maskData[maskPos] = 0;
+                } else {
+                    // Foreground - keep original
+                    processedData[i] = r;
+                    processedData[i + 1] = g;
+                    processedData[i + 2] = b;
+                    processedData[i + 3] = 255;
+                    maskData[maskPos] = 1;
+                }
+            }
+            
+            // Store the processed image data
+            this.processedImageData = new ImageData(processedData, this.originalImageData.width, this.originalImageData.height);
+            this.maskData = maskData;
+            
+            return true;
+        } catch (error) {
+            console.error('Fallback processing failed:', error);
+            return false;
+        }
+    }
+    
+    // Sample edge colors to determine likely background
+    sampleEdgeColors(imageData, width, height) {
+        const edgeColors = [];
+        const edgeWidth = 5; // Sample from 5-pixel border
+        
+        // Top edge
+        for (let y = 0; y < edgeWidth; y++) {
+            for (let x = 0; x < width; x++) {
+                const pos = (y * width + x) * 4;
+                edgeColors.push({
+                    r: imageData[pos],
+                    g: imageData[pos + 1],
+                    b: imageData[pos + 2]
+                });
+            }
+        }
+        
+        // Bottom edge
+        for (let y = height - edgeWidth; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                const pos = (y * width + x) * 4;
+                edgeColors.push({
+                    r: imageData[pos],
+                    g: imageData[pos + 1],
+                    b: imageData[pos + 2]
+                });
+            }
+        }
+        
+        // Left edge
+        for (let y = edgeWidth; y < height - edgeWidth; y++) {
+            for (let x = 0; x < edgeWidth; x++) {
+                const pos = (y * width + x) * 4;
+                edgeColors.push({
+                    r: imageData[pos],
+                    g: imageData[pos + 1],
+                    b: imageData[pos + 2]
+                });
+            }
+        }
+        
+        // Right edge
+        for (let y = edgeWidth; y < height - edgeWidth; y++) {
+            for (let x = width - edgeWidth; x < width; x++) {
+                const pos = (y * width + x) * 4;
+                edgeColors.push({
+                    r: imageData[pos],
+                    g: imageData[pos + 1],
+                    b: imageData[pos + 2]
+                });
+            }
+        }
+        
+        return edgeColors;
+    }
+    
+    // Calculate average color from an array of colors
+    calculateAverageColor(colors) {
+        let r = 0, g = 0, b = 0;
+        
+        for (const color of colors) {
+            r += color.r;
+            g += color.g;
+            b += color.b;
+        }
+        
+        return {
+            r: Math.round(r / colors.length),
+            g: Math.round(g / colors.length),
+            b: Math.round(b / colors.length)
+        };
+    }
+    
+    // Update canvas preview
+    updateCanvasPreview() {
+        if (!this.processedImageData) return;
+        
+        // Clear canvas
+        this.processedCtx.clearRect(0, 0, this.processedCanvas.width, this.processedCanvas.height);
+        
+        // Apply zoom and pan transformations
+        this.processedCtx.save();
+        this.processedCtx.translate(this.zoomOffsetX, this.zoomOffsetY);
+        this.processedCtx.scale(this.zoomLevel, this.zoomLevel);
+        
+        // Draw checkerboard background for transparency
+        this.drawCheckerboard();
+        
+        // Draw the processed image
+        this.processedCtx.putImageData(this.processedImageData, 0, 0);
+        
+        // Apply watermark if enabled
+        if (this.watermarkToggle.checked) {
+            this.applyWatermark();
+        }
+        
+        // Restore transformations
+        this.processedCtx.restore();
+        
+        // If smart preview is on, show original in the processed canvas
+        if (this.smartPreviewToggle.checked) {
+            this.processedCtx.globalAlpha = 0.5;
+            this.processedCtx.drawImage(this.originalCanvas, 0, 0);
+            this.processedCtx.globalAlpha = 1.0;
+        }
+    }
+    
+    // Draw checkerboard pattern for transparency
+    drawCheckerboard() {
+        const size = 20;
+        const rows = Math.ceil(this.processedCanvas.height / size);
+        const cols = Math.ceil(this.processedCanvas.width / size);
+        
+        this.processedCtx.fillStyle = '#e5e5e5';
+        this.processedCtx.fillRect(0, 0, this.processedCanvas.width, this.processedCanvas.height);
+        
+        this.processedCtx.fillStyle = '#cccccc';
+        for (let y = 0; y < rows; y++) {
+            for (let x = 0; x < cols; x++) {
+                if ((x + y) % 2 === 0) {
+                    this.processedCtx.fillRect(
+                        x * size, 
+                        y * size, 
+                        size, 
+                        size
+                    );
+                }
+            }
+        }
+    }
+    
+    // Apply watermark to the image
+    applyWatermark() {
+        const watermarkType = document.querySelector('input[name="watermarkType"]:checked').value;
+        
+        if (watermarkType === 'text') {
+            this.applyTextWatermark();
+        } else if (watermarkType === 'image' && this.watermarkImage) {
+            this.applyImageWatermark();
+        }
+    }
+    
+    // Apply text watermark
+    applyTextWatermark() {
+        const text = this.watermarkText.value || 'ProCut';
+        const color = this.watermarkColor.value;
+        const opacity = parseInt(this.watermarkOpacity.value) / 100;
+        
+        this.processedCtx.save();
+        this.processedCtx.globalAlpha = opacity;
+        this.processedCtx.fillStyle = color;
+        this.processedCtx.font = 'bold 24px Arial';
+        this.processedCtx.textAlign = 'center';
+        this.processedCtx.textBaseline = 'middle';
+        
+        // Calculate position (center)
+        const x = this.processedCanvas.width / 2;
+        const y = this.processedCanvas.height / 2;
+        
+        // Add text shadow for better visibility
+        this.processedCtx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        this.processedCtx.shadowBlur = 5;
+        this.processedCtx.shadowOffsetX = 2;
+        this.processedCtx.shadowOffsetY = 2;
+        
+        this.processedCtx.fillText(text, x, y);
+        this.processedCtx.restore();
+    }
+    
+    // Apply image watermark
+    applyImageWatermark() {
+        if (!this.watermarkImage) return;
+        
+        const opacity = parseInt(this.watermarkOpacity.value) / 100;
+        
+        // Calculate dimensions (20% of canvas width, maintain aspect ratio)
+        const maxWidth = this.processedCanvas.width * 0.2;
+        const ratio = maxWidth / this.watermarkImage.width;
+        const width = maxWidth;
+        const height = this.watermarkImage.height * ratio;
+        
+        // Position (bottom right with 10px margin)
+        const x = this.processedCanvas.width - width - 10;
+        const y = this.processedCanvas.height - height - 10;
+        
+        this.processedCtx.save();
+        this.processedCtx.globalAlpha = opacity;
+        this.processedCtx.drawImage(this.watermarkImage, x, y, width, height);
+        this.processedCtx.restore();
+    }
+    
+    // Load watermark image
+    loadWatermarkImage(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.watermarkImage = new Image();
+            this.watermarkImage.onload = () => {
+                this.updateCanvasPreview();
+            };
+            this.watermarkImage.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    // Load sample image
+    loadSampleImage(sampleId) {
+        this.showLoading('Loading sample image...');
+        
+        // In a real app, you would have actual sample images
+        // For this demo, we'll just use a placeholder
+        const img = new Image();
+        img.onload = () => {
+            this.currentImage = img;
+            this.setCanvasDimensions(img.width, img.height);
+            this.originalCtx.drawImage(img, 0, 0);
+            this.originalImageData = this.originalCtx.getImageData(0, 0, this.originalCanvas.width, this.originalCanvas.height);
+            
+            // Process the image
+            this.processImage().then(() => {
+                this.uploadZone.classList.add('hidden');
+                this.processingArea.classList.remove('hidden');
+                this.actionButtons.classList.remove('hidden');
+                this.resetZoom();
+                this.hideLoading();
+            });
+        };
+        
+        // Placeholder sample image URL - replace with your actual sample images
+        img.src = `https://example.com/samples/${sampleId}.jpg`;
+    }
+    
+    // Apply brush to mask
+    applyBrush(x, y) {
+        if (!this.maskData || !this.processedImageData) return;
+        
+        // Adjust coordinates for zoom and pan
+        const adjustedX = (x - this.zoomOffsetX) / this.zoomLevel;
+        const adjustedY = (y - this.zoomOffsetY) / this.zoomLevel;
+        
+        const width = this.processedCanvas.width;
+        const height = this.processedCanvas.height;
+        const radius = this.brushSizeValue / 2;
+        const radiusSq = radius * radius;
+        
+        const originalData = this.originalImageData.data;
+        const processedData = this.processedImageData.data;
+        
+        // Convert coordinates to image data coordinates
+        const imgX = Math.round(adjustedX);
+        const imgY = Math.round(adjustedY);
+        
+        // Iterate through pixels in a circular area around the brush position
+        for (let y = Math.max(0, imgY - radius); y < Math.min(height, imgY + radius); y++) {
+            for (let x = Math.max(0, imgX - radius); x < Math.min(width, imgX + radius); x++) {
+                const distSq = (x - imgX) * (x - imgX) + (y - imgY) * (y - imgY);
+                
+                if (distSq <= radiusSq) {
+                    const pos = (y * width + x) * 4;
+                    const maskPos = y * width + x;
+                    
+                    if (this.currentTool === 'keep') {
+                        // Keep this pixel (copy from original)
+                        processedData[pos] = originalData[pos];
+                        processedData[pos + 1] = originalData[pos + 1];
+                        processedData[pos + 2] = originalData[pos + 2];
+                        processedData[pos + 3] = 255;
+                        this.maskData[maskPos] = 1;
                     } else {
-                        this.originalCanvas.style.display = 'block';
-                        this.resultCanvas.style.display = 'none';
+                        // Remove this pixel (make transparent)
+                        processedData[pos] = 0;
+                        processedData[pos + 1] = 0;
+                        processedData[pos + 2] = 0;
+                        processedData[pos + 3] = 0;
+                        this.maskData[maskPos] = 0;
                     }
-                });
-                
-                // Preview Slider
-                this.setupPreviewSlider();
-                
-                // Tool Selection
-                this.keepTool.addEventListener('click', () => this.setActiveTool('keep'));
-                this.removeTool.addEventListener('click', () => this.setActiveTool('remove'));
-                this.brushTool.addEventListener('click', () => this.setActiveTool('brush'));
-                this.eraserTool.addEventListener('click', () => this.setActiveTool('eraser'));
-                
-                // Slider Events
-                this.brushSizeSlider.addEventListener('input', () => {
-                    this.state.brushSize = parseInt(this.brushSizeSlider.value);
-                    this.brushSizeValue.textContent = this.state.brushSize;
-                });
-                this.brushHardnessSlider.addEventListener('input', () => {
-                    this.state.brushHardness = parseInt(this.brushHardnessSlider.value);
-                    this.brushHardnessValue.textContent = `${this.state.brushHardness}%`;
-                });
-                this.toleranceSlider.addEventListener('input', () => {
-                    this.state.tolerance = parseInt(this.toleranceSlider.value);
-                    this.toleranceValue.textContent = `${this.state.tolerance}%`;
-                });
-                this.contrastSlider.addEventListener('input', () => {
-                    this.state.contrast = parseInt(this.contrastSlider.value);
-                    this.contrastValue.textContent = `${this.state.contrast}%`;
-                });
-                this.smoothnessSlider.addEventListener('input', () => {
-                    this.state.smoothness = parseInt(this.smoothnessSlider.value);
-                    this.smoothnessValue.textContent = `${this.state.smoothness}%`;
-                    this.applyEdgeRefinement();
-                });
-                this.featherSlider.addEventListener('input', () => {
-                    this.state.feather = parseInt(this.featherSlider.value);
-                    this.featherValue.textContent = `${this.state.feather}%`;
-                    this.applyEdgeRefinement();
-                });
-                this.watermarkOpacitySlider.addEventListener('input', () => {
-                    this.state.watermark.opacity = parseInt(this.watermarkOpacitySlider.value);
-                    this.watermarkOpacityValue.textContent = `${this.state.watermark.opacity}%`;
-                });
-                this.watermarkToggle.addEventListener('change', () => {
-                    this.state.watermark.enabled = this.watermarkToggle.checked;
-                });
-                this.watermarkText.addEventListener('input', () => {
-                    this.state.watermark.text = this.watermarkText.value || 'ProBG Remover';
-                });
-                
-                // Action Buttons
-                this.undoBtn.addEventListener('click', () => this.undo());
-                this.redoBtn.addEventListener('click', () => this.redo());
-                this.resetBtn.addEventListener('click', () => this.resetImage());
-                this.downloadBtn.addEventListener('click', () => this.downloadImage());
-                
-                // Canvas Events
-                this.setupCanvasEvents();
+                }
             }
-            
-            setupPreviewSlider() {
-                let isDragging = false;
+        }
+        
+        // Update the canvas
+        this.updateCanvasPreview();
+    }
+    
+    // Apply edge refinement
+    applyEdgeRefinement() {
+        if (!this.processedImageData || !this.originalImageData) return;
+        
+        // Get slider values
+        const smoothness = parseInt(this.edgeSmoothness.value) / 100;
+        const feather = parseInt(this.edgeFeather.value) / 100;
+        const contrast = parseInt(this.contrast.value) / 50; // 0-2 range
+        
+        // Create a copy of the original image data
+        const width = this.processedCanvas.width;
+        const height = this.processedCanvas.height;
+        const originalData = this.originalImageData.data;
+        const processedData = new Uint8ClampedArray(this.processedImageData.data);
+        
+        // Apply edge refinement
+        for (let y = 1; y < height - 1; y++) {
+            for (let x = 1; x < width - 1; x++) {
+                const pos = (y * width + x) * 4;
+                const maskPos = y * width + x;
                 
-                this.sliderThumb.addEventListener('mousedown', (e) => {
-                    isDragging = true;
-                    document.addEventListener('mousemove', handleMove);
-                    document.addEventListener('mouseup', () => {
-                        isDragging = false;
-                        document.removeEventListener('mousemove', handleMove);
-                    });
-                });
-                
-                this.previewSlider.addEventListener('click', (e) => {
-                    const rect = this.previewSlider.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const percent = Math.min(Math.max(x / rect.width, 0), 1);
-                    updateSliderPosition(percent);
-                });
-                
-                const handleMove = (e) => {
-                    if (!isDragging) return;
-                    const rect = this.previewSlider.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const percent = Math.min(Math.max(x / rect.width, 0), 1);
-                    updateSliderPosition(percent);
-                };
-                
-                const updateSliderPosition = (percent) => {
-                    const thumbPos = percent * 100;
-                    this.sliderThumb.style.left = `${thumbPos}%`;
+                // Only process edge pixels (where mask transitions from 0 to 1 or vice versa)
+                if (this.maskData[maskPos] === 1) {
+                    let isEdge = false;
                     
-                    // Update canvas visibility based on slider position
-                    this.originalCanvas.style.opacity = 1 - percent;
-                    this.resultCanvas.style.opacity = percent;
-                    this.originalCanvas.style.display = 'block';
-                    this.resultCanvas.style.display = 'block';
-                };
-            }
-            
-            setupCanvasEvents() {
-                // Common variables for drawing
-                let isDrawing = false;
-                let lastX = 0;
-                let lastY = 0;
-                
-                // Mouse/Touch down event
-                const startDrawing = (e) => {
-                    if (!this.state.originalImage) return;
-                    
-                    isDrawing = true;
-                    const pos = this.getCanvasPosition(e);
-                    lastX = pos.x;
-                    lastY = pos.y;
-                    
-                    // Save state to history before making changes
-                    this.saveHistory();
-                };
-                
-                // Mouse/Touch move event
-                const draw = (e) => {
-                    if (!isDrawing || !this.state.activeTool) return;
-                    
-                    const pos = this.getCanvasPosition(e);
-                    const ctx = this.originalCanvas.getContext('2d');
-                    
-                    // Draw on the canvas based on active tool
-                    switch (this.state.activeTool) {
-                        case 'brush':
-                        case 'eraser':
-                        case 'keep':
-                        case 'remove':
-                            this.drawBrushStroke(ctx, lastX, lastY, pos.x, pos.y);
-                            break;
+                    // Check 8 surrounding pixels
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            if (dx === 0 && dy === 0) continue;
+                            
+                            const neighborPos = ((y + dy) * width + (x + dx)) * 4;
+                            const neighborMaskPos = (y + dy) * width + (x + dx);
+                            
+                            if (this.maskData[neighborMaskPos] === 0) {
+                                isEdge = true;
+                                break;
+                            }
+                        }
+                        if (isEdge) break;
                     }
                     
-                    lastX = pos.x;
-                    lastY = pos.y;
-                    
-                    // Update the result after drawing
-                    this.updateResult();
-                };
-                
-                // Mouse/Touch up event
-                const stopDrawing = () => {
-                    isDrawing = false;
-                };
-                
-                // Add event listeners for mouse
-                this.originalCanvas.addEventListener('mousedown', startDrawing);
-                this.originalCanvas.addEventListener('mousemove', draw);
-                this.originalCanvas.addEventListener('mouseup', stopDrawing);
-                this.originalCanvas.addEventListener('mouseout', stopDrawing);
-                
-                // Add event listeners for touch
-                this.originalCanvas.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    startDrawing(e.touches[0]);
-                });
-                this.originalCanvas.addEventListener('touchmove', (e) => {
-                    e.preventDefault();
-                    draw(e.touches[0]);
-                });
-                this.originalCanvas.addEventListener('touchend', stopDrawing);
-            }
-            
-            getCanvasPosition(e) {
-                const rect = this.originalCanvas.getBoundingClientRect();
-                const scaleX = this.originalCanvas.width / rect.width;
-                const scaleY = this.originalCanvas.height / rect.height;
-                
-                return {
-                    x: (e.clientX - rect.left) * scaleX,
-                    y: (e.clientY - rect.top) * scaleY
-                };
-            }
-            
-            drawBrushStroke(ctx, x1, y1, x2, y2) {
-                // Set brush properties based on active tool
-                let color, opacity;
-                switch (this.state.activeTool) {
-                    case 'keep':
-                        color = '#00FF00'; // Green for keep
-                        opacity = 0.7;
-                        break;
-                    case 'remove':
-                        color = '#FF0000'; // Red for remove
-                        opacity = 0.7;
-                        break;
-                    case 'brush':
-                        color = '#00FF00'; // Green for brush (keep)
-                        opacity = 0.5;
-                        break;
-                    case 'eraser':
-                        color = '#FF0000'; // Red for eraser (remove)
-                        opacity = 0.5;
-                        break;
-                    default:
-                        return;
-                }
-                
-                // Draw the brush stroke
-                ctx.strokeStyle = color;
-                ctx.globalAlpha = opacity;
-                ctx.lineWidth = this.state.brushSize;
-                ctx.lineJoin = 'round';
-                ctx.lineCap = 'round';
-                
-                // For hardness, we can use a gradient or multiple strokes
-                // This is a simplified version
-                ctx.beginPath();
-                ctx.moveTo(x1, y1);
-                ctx.lineTo(x2, y2);
-                ctx.stroke();
-                
-                // Draw circles at the ends for better appearance
-                ctx.beginPath();
-                ctx.arc(x1, y1, this.state.brushSize / 2, 0, Math.PI * 2);
-                ctx.fillStyle = color;
-                ctx.globalAlpha = opacity;
-                ctx.fill();
-                
-                ctx.beginPath();
-                ctx.arc(x2, y2, this.state.brushSize / 2, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.globalAlpha = 1.0;
-            }
-            
-            setActiveTool(tool) {
-                this.state.activeTool = tool;
-                
-                // Update UI to show active tool
-                this.keepTool.classList.remove('active');
-                this.removeTool.classList.remove('active');
-                this.brushTool.classList.remove('active');
-                this.eraserTool.classList.remove('active');
-                
-                switch (tool) {
-                    case 'keep':
-                        this.keepTool.classList.add('active');
-                        break;
-                    case 'remove':
-                        this.removeTool.classList.add('active');
-                        break;
-                    case 'brush':
-                        this.brushTool.classList.add('active');
-                        break;
-                    case 'eraser':
-                        this.eraserTool.classList.add('active');
-                        break;
-                }
-            }
-            
-            async handleFileUpload(file) {
-                // Validate file
-                if (!file.type.match('image.*')) {
-                    this.showToast('Please upload an image file (PNG, JPG, JPEG)', 'error');
-                    return;
-                }
-                
-                if (file.size > 10 * 1024 * 1024) { // 10MB limit
-                    this.showToast('File size should be less than 10MB', 'error');
-                    return;
-                }
-                
-                this.showLoading('Loading image...');
-                
-                try {
-                    // Load the image
-                    const img = await this.loadImage(file);
-                    
-                    // Show the preview and tools sections
-                    this.previewSection.style.display = 'block';
-                    this.toolsSection.style.display = 'block';
-                    
-                    // Set the image in state
-                    this.state.originalImage = img;
-                    this.state.processedImage = null;
-                    this.state.maskData = null;
-                    this.state.history = [];
-                    this.state.historyIndex = -1;
-                    
-                    // Draw the image on canvas
-                    this.drawOriginalImage();
-                    
-                    // Initialize mask
-                    this.initializeMask();
-                    
-                    // Hide loading
-                    this.hideLoading();
-                    
-                    // Show success message
-                    this.showToast('Image loaded successfully', 'success');
-                    
-                } catch (error) {
-                    console.error('Error loading image:', error);
-                    this.hideLoading();
-                    this.showToast('Error loading image. Please try another file.', 'error');
-                }
-            }
-            
-            loadImage(file) {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const img = new Image();
-                        img.onload = () => resolve(img);
-                        img.onerror = reject;
-                        img.src = e.target.result;
-                    };
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
-            }
-            
-            drawOriginalImage() {
-                const img = this.state.originalImage;
-                const canvas = this.originalCanvas;
-                const resultCanvas = this.resultCanvas;
-                
-                // Calculate dimensions to fit in preview container while maintaining aspect ratio
-                const container = this.previewContainer;
-                const containerWidth = container.clientWidth;
-                const containerHeight = container.clientHeight;
-                
-                let width = img.width;
-                let height = img.height;
-                
-                // Scale down if necessary
-                if (width > containerWidth || height > containerHeight) {
-                    const ratio = Math.min(containerWidth / width, containerHeight / height);
-                    width *= ratio;
-                    height *= ratio;
-                }
-                
-                // Set canvas dimensions
-                canvas.width = width;
-                canvas.height = height;
-                resultCanvas.width = width;
-                resultCanvas.height = height;
-                this.hiddenCanvas.width = width;
-                this.hiddenCanvas.height = height;
-                
-                // Save canvas size in state
-                this.state.canvasSize = { width, height };
-                
-                // Draw image on canvas
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-                
-                // Clear result canvas
-                const resultCtx = resultCanvas.getContext('2d');
-                resultCtx.clearRect(0, 0, width, height);
-            }
-            
-            initializeMask() {
-                // Create a blank mask (fully transparent)
-                const { width, height } = this.state.canvasSize;
-                const ctx = this.hiddenCanvas.getContext('2d');
-                ctx.clearRect(0, 0, width, height);
-                
-                // Perform initial background removal (simplified)
-                this.removeBackground();
-            }
-            
-            removeBackground() {
-                this.showLoading('Removing background...');
-                
-                // Simulate background removal with timeout (in a real app, this would use actual algorithms)
-                setTimeout(() => {
-                    const { originalImage, canvasSize } = this.state;
-                    const { width, height } = canvasSize;
-                    
-                    // Get image data from original canvas
-                    const originalCtx = this.originalCanvas.getContext('2d');
-                    const imageData = originalCtx.getImageData(0, 0, width, height);
-                    const data = imageData.data;
-                    
-                    // Create mask (simplified algorithm)
-                    // In a real implementation, this would use more sophisticated edge detection
-                    for (let i = 0; i < data.length; i += 4) {
-                        const r = data[i];
-                        const g = data[i + 1];
-                        const b = data[i + 2];
+                    if (isEdge) {
+                        // Apply smoothing
+                        if (smoothness > 0) {
+                            let r = 0, g = 0, b = 0, count = 0;
+                            
+                            // Average with surrounding pixels
+                            for (let dy = -1; dy <= 1; dy++) {
+                                for (let dx = -1; dx <= 1; dx++) {
+                                    if (dx === 0 && dy === 0) continue;
+                                    
+                                    const neighborPos = ((y + dy) * width + (x + dx)) * 4;
+                                    
+                                    r += originalData[neighborPos];
+                                    g += originalData[neighborPos + 1];
+                                    b += originalData[neighborPos + 2];
+                                    count++;
+                                }
+                            }
+                            
+                            // Blend with original based on smoothness
+                            processedData[pos] = Math.round(originalData[pos] * (1 - smoothness) + (r / count) * smoothness);
+                            processedData[pos + 1] = Math.round(originalData[pos + 1] * (1 - smoothness) + (g / count) * smoothness);
+                            processedData[pos + 2] = Math.round(originalData[pos + 2] * (1 - smoothness) + (b / count) * smoothness);
+                        }
                         
-                        // Simple background detection (assuming light background)
-                        const brightness = (r + g + b) / 3;
-                        if (brightness > 200) { // Threshold for background
-                            data[i + 3] = 0; // Set alpha to 0 (transparent)
+                        // Apply feathering (alpha transition)
+                        if (feather > 0) {
+                            // Find distance to nearest background pixel
+                            let minDist = Infinity;
+                            
+                            for (let dy = -3; dy <= 3; dy++) {
+                                for (let dx = -3; dx <= 3; dx++) {
+                                    if (dx === 0 && dy === 0) continue;
+                                    
+                                    const neighborMaskPos = (y + dy) * width + (x + dx);
+                                    
+                                    if (neighborMaskPos >= 0 && neighborMaskPos < this.maskData.length && 
+                                        this.maskData[neighborMaskPos] === 0) {
+                                        const dist = Math.sqrt(dx * dx + dy * dy);
+                                        if (dist < minDist) minDist = dist;
+                                    }
+                                }
+                            }
+                            
+                            if (minDist < Infinity) {
+                                // Adjust alpha based on distance
+                                const alpha = Math.min(1, minDist / 3); // 0-1 range
+                                processedData[pos + 3] = Math.round(255 * Math.pow(alpha, 1 - feather));
+                            }
+                        }
+                        
+                        // Apply contrast
+                        if (contrast !== 1) {
+                            // Simple contrast adjustment
+                            const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+                            
+                            processedData[pos] = this.clamp(factor * (processedData[pos] - 128) + 128, 0, 255);
+                            processedData[pos + 1] = this.clamp(factor * (processedData[pos + 1] - 128) + 128, 0, 255);
+                            processedData[pos + 2] = this.clamp(factor * (processedData[pos + 2] - 128) + 128, 0, 255);
                         }
                     }
-                    
-                    // Put the processed data back
-                    originalCtx.putImageData(imageData, 0, 0);
-                    
-                    // Update the result
-                    this.updateResult();
-                    
-                    // Save to history
-                    this.saveHistory();
-                    
-                    this.hideLoading();
-                    this.showToast('Background removed. Use tools to refine edges.', 'success');
-                }, 1500);
-            }
-            
-            updateResult() {
-                const { width, height } = this.state.canvasSize;
-                const originalCtx = this.originalCanvas.getContext('2d');
-                const resultCtx = this.resultCanvas.getContext('2d');
-                
-                // Get the current image data with user edits
-                const imageData = originalCtx.getImageData(0, 0, width, height);
-                
-                // Apply edge refinement
-                this.applyEdgeRefinement(imageData);
-                
-                // Put the processed data to result canvas
-                resultCtx.putImageData(imageData, 0, 0);
-                
-                // Apply watermark if enabled
-                if (this.state.watermark.enabled) {
-                    this.applyWatermark(resultCtx);
                 }
-            }
-            
-            applyEdgeRefinement(imageData) {
-                // This would apply edge refinement based on smoothness and feather settings
-                // In a real implementation, this would use sophisticated algorithms
-                
-                // For now, we'll just simulate it
-                const smoothness = this.state.smoothness / 100;
-                const feather = this.state.feather / 100;
-                
-                // console.log(`Applying edge refinement: smoothness=${smoothness}, feather=${feather}`);
-            }
-            
-            applyWatermark(ctx) {
-                const { width, height } = this.state.canvasSize;
-                const watermark = this.state.watermark;
-                
-                ctx.font = '20px Arial';
-                ctx.fillStyle = `rgba(255, 255, 255, ${watermark.opacity / 100})`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(watermark.text, width / 2, height / 2);
-            }
-            
-            saveHistory() {
-                // Remove any history after current index (if we're not at the end)
-                if (this.state.historyIndex < this.state.history.length - 1) {
-                    this.state.history = this.state.history.slice(0, this.state.historyIndex + 1);
-                }
-                
-                // Save current canvas state
-                const { width, height } = this.state.canvasSize;
-                const ctx = this.originalCanvas.getContext('2d');
-                const imageData = ctx.getImageData(0, 0, width, height);
-                
-                // Add to history
-                this.state.history.push(imageData);
-                this.state.historyIndex = this.state.history.length - 1;
-                
-                // Update undo/redo buttons
-                this.updateUndoRedoButtons();
-            }
-            
-            undo() {
-                if (this.state.historyIndex <= 0) return;
-                
-                this.state.historyIndex--;
-                this.restoreFromHistory();
-            }
-            
-            redo() {
-                if (this.state.historyIndex >= this.state.history.length - 1) return;
-                
-                this.state.historyIndex++;
-                this.restoreFromHistory();
-            }
-            
-            restoreFromHistory() {
-                const { width, height } = this.state.canvasSize;
-                const ctx = this.originalCanvas.getContext('2d');
-                const imageData = this.state.history[this.state.historyIndex];
-                
-                ctx.putImageData(imageData, 0, 0);
-                this.updateResult();
-                this.updateUndoRedoButtons();
-            }
-            
-            updateUndoRedoButtons() {
-                this.undoBtn.disabled = this.state.historyIndex <= 0;
-                this.redoBtn.disabled = this.state.historyIndex >= this.state.history.length - 1;
-            }
-            
-            resetImage() {
-                if (!this.state.originalImage) return;
-                
-                // Reset to original image
-                this.drawOriginalImage();
-                
-                // Reinitialize mask
-                this.initializeMask();
-                
-                // Reset history
-                this.state.history = [];
-                this.state.historyIndex = -1;
-                this.updateUndoRedoButtons();
-                
-                this.showToast('Image reset to original', 'success');
-            }
-            
-            downloadImage() {
-                if (!this.state.originalImage) return;
-                
-                // Create a temporary canvas with the result
-                const { width, height } = this.state.canvasSize;
-                const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = width;
-                tempCanvas.height = height;
-                const tempCtx = tempCanvas.getContext('2d');
-                
-                // Draw the result
-                const resultCtx = this.resultCanvas.getContext('2d');
-                const imageData = resultCtx.getImageData(0, 0, width, height);
-                tempCtx.putImageData(imageData, 0, 0);
-                
-                // Apply watermark if enabled
-                if (this.state.watermark.enabled) {
-                    this.applyWatermark(tempCtx);
-                }
-                
-                // Convert to data URL
-                const dataURL = tempCanvas.toDataURL('image/png');
-                
-                // Create download link
-                const link = document.createElement('a');
-                link.download = `bg_removed_${Date.now()}.png`;
-                link.href = dataURL;
-                link.click();
-                
-                this.showToast('Image downloaded successfully', 'success');
-            }
-            
-            showLoading(message) {
-                this.loadingText.textContent = message;
-                this.loadingOverlay.classList.add('active');
-            }
-            
-            hideLoading() {
-                this.loadingOverlay.classList.remove('active');
-            }
-            
-            showToast(message, type = 'info') {
-                this.toast.textContent = message;
-                this.toast.className = 'toast';
-                this.toast.classList.add(type);
-                this.toast.classList.add('show');
-                
-                setTimeout(() => {
-                    this.toast.classList.remove('show');
-                }, 3000);
             }
         }
         
-        // Helper function for accessibility
-        function visuallyHidden() {
-            return `
-                position: absolute;
-                width: 1px;
-                height: 1px;
-                padding: 0;
-                margin: -1px;
-                overflow: hidden;
-                clip: rect(0, 0, 0, 0);
-                white-space: nowrap;
-                border-width: 0;
-            `;
+        // Update the processed image data
+        this.processedImageData = new ImageData(processedData, width, height);
+        
+        // Update the canvas
+        this.updateCanvasPreview();
+    }
+    
+    // Clamp value between min and max
+    clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    }
+    
+    // Adjust zoom level
+    adjustZoom(factor) {
+        this.zoomLevel *= factor;
+        
+        // Limit zoom
+        this.zoomLevel = Math.max(0.1, Math.min(this.zoomLevel, 10));
+        
+        this.updateCanvasPreview();
+    }
+    
+    // Reset zoom and pan
+    resetZoom() {
+        this.zoomLevel = 1;
+        this.zoomOffsetX = 0;
+        this.zoomOffsetY = 0;
+        this.updateCanvasPreview();
+    }
+    
+    // Save current state for undo/redo
+    saveState() {
+        if (!this.processedImageData) return;
+        
+        // Remove any states after current position in history
+        if (this.currentHistoryIndex < this.actionHistory.length - 1) {
+            this.actionHistory = this.actionHistory.slice(0, this.currentHistoryIndex + 1);
         }
         
-        // Add visually hidden style to head
-        const style = document.createElement('style');
-        style.textContent = `.visually-hidden { ${visuallyHidden()} }`;
-        document.head.appendChild(style);
+        // Create copies of the current state
+        const processedDataCopy = new Uint8ClampedArray(this.processedImageData.data);
+        const maskDataCopy = new Uint8Array(this.maskData);
         
-        // Initialize the application when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            const bgRemover = new BackgroundRemover();
+        // Add to history
+        this.actionHistory.push({
+            processedData: new ImageData(processedDataCopy, this.processedImageData.width, this.processedImageData.height),
+            maskData: maskDataCopy
         });
-    </script>
-</body>
-</html>
+        
+        // Limit history size
+        if (this.actionHistory.length > 20) {
+            this.actionHistory.shift();
+        } else {
+            this.currentHistoryIndex = this.actionHistory.length - 1;
+        }
+        
+        // Update undo/redo button states
+        this.updateUndoRedoButtons();
+    }
+    
+    // Undo last action
+    undoAction() {
+        if (this.currentHistoryIndex <= 0) return;
+        
+        this.currentHistoryIndex--;
+        this.restoreFromHistory();
+    }
+    
+    // Redo last undone action
+    redoAction() {
+        if (this.currentHistoryIndex >= this.actionHistory.length - 1) return;
+        
+        this.currentHistoryIndex++;
+        this.restoreFromHistory();
+    }
+    
+    // Restore state from history
+    restoreFromHistory() {
+        const state = this.actionHistory[this.currentHistoryIndex];
+        
+        // Create new copies to avoid reference issues
+        this.processedImageData = new ImageData(
+            new Uint8ClampedArray(state.processedData.data),
+            state.processedData.width,
+            state.processedData.height
+        );
+        
+        this.maskData = new Uint8Array(state.maskData);
+        
+        // Update the canvas
+        this.updateCanvasPreview();
+        
+        // Update undo/redo button states
+        this.updateUndoRedoButtons();
+    }
+    
+    // Update undo/redo button states
+    updateUndoRedoButtons() {
+        this.undoBtn.disabled = this.currentHistoryIndex <= 0;
+        this.redoBtn.disabled = this.currentHistoryIndex >= this.actionHistory.length - 1;
+    }
+    
+    // Reset mask (keep original image)
+    resetMask() {
+        if (!this.originalImageData) return;
+        
+        // Create a new mask that keeps everything
+        this.maskData = new Uint8Array(this.originalImageData.data.length / 4).fill(1);
+        
+        // Create processed image from original
+        const processedData = new Uint8ClampedArray(this.originalImageData.data);
+        this.processedImageData = new ImageData(processedData, this.originalImageData.width, this.originalImageData.height);
+        
+        // Save state
+        this.saveState();
+        
+        // Update the canvas
+        this.updateCanvasPreview();
+    }
+    
+    // Download the processed image
+    downloadImage() {
+        if (!this.processedImageData) return;
+        
+        try {
+            // Create a temporary canvas at the original image dimensions
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            // Set to original image dimensions for full resolution
+            tempCanvas.width = this.currentImage.width;
+            tempCanvas.height = this.currentImage.height;
+            
+            // Draw checkerboard background
+            this.drawCheckerboardOnCanvas(tempCtx, tempCanvas.width, tempCanvas.height);
+            
+            // Draw the original image on the temp canvas
+            tempCtx.drawImage(this.currentImage, 0, 0);
+            
+            // Apply the mask from the processed image
+            const maskCanvas = document.createElement('canvas');
+            const maskCtx = maskCanvas.getContext('2d');
+            maskCanvas.width = this.processedCanvas.width;
+            maskCanvas.height = this.processedCanvas.height;
+            
+            // Put the processed image data (which has transparency) on the mask canvas
+            maskCtx.putImageData(this.processedImageData, 0, 0);
+            
+            // Draw the mask onto the temp canvas with proper scaling
+            tempCtx.save();
+            tempCtx.globalCompositeOperation = 'destination-in';
+            tempCtx.drawImage(
+                maskCanvas, 
+                0, 0, maskCanvas.width, maskCanvas.height,
+                0, 0, tempCanvas.width, tempCanvas.height
+            );
+            tempCtx.restore();
+            
+            // Apply watermark if enabled
+            if (this.watermarkToggle.checked) {
+                this.applyWatermarkToCanvas(tempCtx, tempCanvas.width, tempCanvas.height);
+            }
+            
+            // Create filename
+            let filename = 'image_transparent.png';
+            if (this.fileInput.files.length) {
+                const originalName = this.fileInput.files[0].name.split('.')[0];
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                filename = `${originalName}_transparent_${timestamp}.png`;
+            }
+            
+            // Convert to data URL and download
+            const dataURL = tempCanvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = dataURL;
+            link.download = filename;
+            link.click();
+            
+            // Show success modal
+            this.successModal.classList.remove('hidden');
+        } catch (error) {
+            console.error('Error downloading image:', error);
+            this.showError('Download Failed', 'There was an error preparing your image for download. Please try again.');
+        }
+    }
+    
+    // Draw checkerboard pattern on any canvas
+    drawCheckerboardOnCanvas(ctx, width, height) {
+        const size = 20;
+        const rows = Math.ceil(height / size);
+        const cols = Math.ceil(width / size);
+        
+        ctx.fillStyle = '#e5e5e5';
+        ctx.fillRect(0, 0, width, height);
+        
+        ctx.fillStyle = '#cccccc';
+        for (let y = 0; y < rows; y++) {
+            for (let x = 0; x < cols; x++) {
+                if ((x + y) % 2 === 0) {
+                    ctx.fillRect(
+                        x * size, 
+                        y * size, 
+                        size, 
+                        size
+                    );
+                }
+            }
+        }
+    }
+    
+    // Apply watermark to any canvas
+    applyWatermarkToCanvas(ctx, width, height) {
+        const watermarkType = document.querySelector('input[name="watermarkType"]:checked').value;
+        
+        if (watermarkType === 'text') {
+            this.applyTextWatermarkToCanvas(ctx, width, height);
+        } else if (watermarkType === 'image' && this.watermarkImage) {
+            this.applyImageWatermarkToCanvas(ctx, width, height);
+        }
+    }
+    
+    // Apply text watermark to any canvas
+    applyTextWatermarkToCanvas(ctx, width, height) {
+        const text = this.watermarkText.value || 'ProCut';
+        const color = this.watermarkColor.value;
+        const opacity = parseInt(this.watermarkOpacity.value) / 100;
+        
+        ctx.save();
+        ctx.globalAlpha = opacity;
+        ctx.fillStyle = color;
+        
+        // Scale font size based on image dimensions
+        const fontSize = Math.max(24, width * 0.03);
+        ctx.font = `bold ${fontSize}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Calculate position (center)
+        const x = width / 2;
+        const y = height / 2;
+        
+        // Add text shadow for better visibility
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        ctx.shadowBlur = 5;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
+        
+        ctx.fillText(text, x, y);
+        ctx.restore();
+    }
+    
+    // Apply image watermark to any canvas
+    applyImageWatermarkToCanvas(ctx, width, height) {
+        if (!this.watermarkImage) return;
+        
+        const opacity = parseInt(this.watermarkOpacity.value) / 100;
+        
+        // Calculate dimensions (20% of canvas width, maintain aspect ratio)
+        const maxWidth = width * 0.2;
+        const ratio = maxWidth / this.watermarkImage.width;
+        const wWidth = maxWidth;
+        const wHeight = this.watermarkImage.height * ratio;
+        
+        // Position (bottom right with 10px margin)
+        const x = width - wWidth - 10;
+        const y = height - wHeight - 10;
+        
+        ctx.save();
+        ctx.globalAlpha = opacity;
+        ctx.drawImage(this.watermarkImage, x, y, wWidth, wHeight);
+        ctx.restore();
+    }
+    
+    // Reset the tool to initial state
+    resetTool() {
+        this.uploadZone.classList.remove('hidden');
+        this.processingArea.classList.add('hidden');
+        this.actionButtons.classList.add('hidden');
+        this.currentImage = null;
+        this.originalImageData = null;
+        this.processedImageData = null;
+        this.maskData = null;
+        this.actionHistory = [];
+        this.currentHistoryIndex = -1;
+        this.fileInput.value = '';
+        this.resetZoom();
+        this.updateUndoRedoButtons();
+    }
+    
+    // Show loading overlay
+    showLoading(message) {
+        this.loadingSubtext.textContent = message || 'Processing your image...';
+        this.loadingOverlay.classList.remove('hidden');
+    }
+    
+    // Hide loading overlay
+    hideLoading() {
+        this.loadingOverlay.classList.add('hidden');
+    }
+    
+    // Show error modal
+    showError(title, message) {
+        this.errorTitle.textContent = title;
+        this.errorMessage.textContent = message;
+        this.errorModal.classList.remove('hidden');
+    }
+}
+
+// Initialize the application when the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    const app = new BackgroundRemover();
+    
+    // Add any global event listeners or initializations here
+    window.addEventListener('resize', () => {
+        // Handle resize if needed
+    });
+});
