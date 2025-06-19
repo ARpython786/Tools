@@ -1,1095 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- ========== SEO META TAGS ========== -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Remove image backgrounds automatically with AI precision. Perfect for product photos, portraits, and complex images with hair, fur, or transparent elements.">
-    <meta name="keywords" content="background remover, remove bg, transparent background, AI photo editor, image background removal">
-    <meta name="author" content="AI Background Remover Pro">
-    <meta property="og:title" content="AI Background Remover Pro | Instant Online Tool">
-    <meta property="og:description" content="Remove backgrounds from images automatically with AI precision. No registration required.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://aibgremoverpro.com">
-    <meta property="og:image" content="https://aibgremoverpro.com/preview.jpg">
-    <title>AI Background Remover Pro | Instant Online Tool</title>
-    <link rel="canonical" href="https://aibgremoverpro.com">
-
-    <!-- ========== PRELOAD & FONTS ========== -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- ========== AD SENSE ========== -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_ADSENSE_ID" crossorigin="anonymous"></script>
-
-    <!-- ========== CSS ========== -->
-    <style>
-        /* ========== GLOBAL VARIABLES ========== */
-        :root {
-            --primary: #6C63FF;
-            --primary-dark: #564FC9;
-            --secondary: #4D44DB;
-            --dark: #1E1E2C;
-            --light: #F8F9FA;
-            --gray: #6C757D;
-            --light-gray: #E9ECEF;
-            --success: #28A745;
-            --danger: #DC3545;
-            --warning: #FFC107;
-            --border-radius: 12px;
-            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-        }
-
-        /* ========== BASE STYLES ========== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            line-height: 1.6;
-            color: var(--dark);
-            background-color: #f5f7ff;
-            overflow-x: hidden;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        img {
-            max-width: 100%;
-            height: auto;
-        }
-
-        /* ========== HEADER STYLES ========== */
-        header {
-            background-color: white;
-            box-shadow: var(--box-shadow);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            padding: 15px 0;
-        }
-
-        .header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: 600;
-            color: var(--primary);
-            text-decoration: none;
-            font-family: 'Poppins', sans-serif;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo i {
-            font-size: 26px;
-        }
-
-        nav ul {
-            display: flex;
-            list-style: none;
-            gap: 25px;
-        }
-
-        nav a {
-            text-decoration: none;
-            color: var(--dark);
-            font-weight: 500;
-            transition: var(--transition);
-            position: relative;
-        }
-
-        nav a:hover {
-            color: var(--primary);
-        }
-
-        nav a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--primary);
-            transition: var(--transition);
-        }
-
-        nav a:hover::after {
-            width: 100%;
-        }
-
-        .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--dark);
-        }
-
-        /* ========== AD BANNER ========== */
-        .ad-banner {
-            background-color: var(--light-gray);
-            padding: 15px;
-            border-radius: var(--border-radius);
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .ad-label {
-            font-size: 0.8rem;
-            color: var(--gray);
-            margin-bottom: 5px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* ========== MAIN CONTENT ========== */
-        main {
-            padding: 30px 0 60px;
-            min-height: calc(100vh - 160px);
-        }
-
-        .tool-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .tool-header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .tool-header p {
-            color: var(--gray);
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        /* ========== TOOL CONTAINER ========== */
-        .tool-container {
-            background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 30px;
-            margin-bottom: 40px;
-        }
-
-        /* ========== UPLOAD SECTION ========== */
-        .upload-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        @media (max-width: 768px) {
-            .upload-section {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .drop-area {
-            border: 2px dashed var(--gray);
-            border-radius: var(--border-radius);
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 300px;
-        }
-
-        .drop-area:hover {
-            border-color: var(--primary);
-        }
-
-        .drop-area.active {
-            border-color: var(--primary);
-            background-color: rgba(108, 99, 255, 0.05);
-        }
-
-        .drop-area i {
-            font-size: 48px;
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-
-        .drop-area h3 {
-            margin-bottom: 10px;
-            font-size: 1.3rem;
-        }
-
-        .drop-area p {
-            color: var(--gray);
-            margin-bottom: 20px;
-        }
-
-        .preview-container {
-            border: 1px solid var(--light-gray);
-            border-radius: var(--border-radius);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 300px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .preview-image {
-            max-width: 100%;
-            max-height: 250px;
-            display: none;
-            margin-bottom: 15px;
-        }
-
-        .preview-placeholder {
-            text-align: center;
-            color: var(--gray);
-        }
-
-        /* ========== BUTTONS ========== */
-        .btn {
-            display: inline-block;
-            background-color: var(--primary);
-            color: white;
-            padding: 12px 24px;
-            border-radius: var(--border-radius);
-            text-decoration: none;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 1rem;
-        }
-
-        .btn:hover {
-            background-color: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: var(--box-shadow);
-        }
-
-        .btn-outline {
-            background-color: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-        }
-
-        .btn-outline:hover {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        /* ========== FILE INPUT ========== */
-        #file-input {
-            display: none;
-        }
-
-        /* ========== OPTIONS SECTION ========== */
-        .options-section {
-            margin: 30px 0;
-            padding: 20px;
-            border: 1px solid var(--light-gray);
-            border-radius: var(--border-radius);
-        }
-
-        .option-row {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: var(--transition);
-            border-radius: 34px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: var(--transition);
-            border-radius: 50%;
-        }
-
-        input:checked + .toggle-slider {
-            background-color: var(--primary);
-        }
-
-        input:checked + .toggle-slider:before {
-            transform: translateX(26px);
-        }
-
-        /* ========== PROGRESS BAR ========== */
-        .progress-container {
-            display: none;
-            margin: 20px 0;
-        }
-
-        .progress-bar {
-            height: 10px;
-            background-color: var(--light-gray);
-            border-radius: 5px;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-
-        .progress {
-            height: 100%;
-            background-color: var(--primary);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .progress-text {
-            text-align: center;
-            font-size: 0.9rem;
-            color: var(--gray);
-        }
-
-        /* ========== RESULTS SECTION ========== */
-        .results-section {
-            display: none;
-            margin-top: 40px;
-        }
-
-        .comparison-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        @media (max-width: 768px) {
-            .comparison-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .image-panel {
-            border: 1px solid var(--light-gray);
-            border-radius: var(--border-radius);
-            padding: 20px;
-            text-align: center;
-        }
-
-        .image-panel h3 {
-            margin-bottom: 15px;
-            color: var(--dark);
-        }
-
-        .image-panel img {
-            max-width: 100%;
-            max-height: 300px;
-            margin-bottom: 15px;
-            border-radius: var(--border-radius);
-        }
-
-        .image-stats {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-        }
-
-        /* ========== TRANSPARENCY BACKGROUND ========== */
-        .transparent-bg {
-            background-image: 
-                linear-gradient(45deg, #dddddd 25%, transparent 25%),
-                linear-gradient(-45deg, #dddddd 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, #dddddd 75%),
-                linear-gradient(-45deg, transparent 75%, #dddddd 75%);
-            background-size: 20px 20px;
-            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-        }
-
-        /* ========== FOOTER ========== */
-        footer {
-            background-color: var(--dark);
-            color: white;
-            padding: 40px 0 20px;
-        }
-
-        .footer-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 40px;
-            margin-bottom: 30px;
-        }
-
-        .footer-column h3 {
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .footer-column ul {
-            list-style: none;
-        }
-
-        .footer-column li {
-            margin-bottom: 10px;
-        }
-
-        .footer-column a {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: var(--transition);
-        }
-
-        .footer-column a:hover {
-            color: white;
-        }
-
-        .copyright {
-            text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.9rem;
-        }
-
-        /* ========== RESPONSIVE DESIGN ========== */
-        @media (max-width: 992px) {
-            .tool-header h1 {
-                font-size: 2.2rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .header-container {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            nav ul {
-                flex-direction: column;
-                align-items: center;
-                gap: 15px;
-                display: none;
-            }
-
-            nav ul.active {
-                display: flex;
-            }
-
-            .mobile-menu-btn {
-                display: block;
-            }
-
-            .tool-header h1 {
-                font-size: 2rem;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .tool-header h1 {
-                font-size: 1.8rem;
-            }
-
-            .btn {
-                padding: 10px 20px;
-            }
-
-            .drop-area, .preview-container {
-                padding: 20px 15px;
-                min-height: 250px;
-            }
-        }
-
-        /* ========== ERROR MESSAGE ========== */
-        .error-message {
-            display: none;
-            background-color: rgba(220, 53, 69, 0.1);
-            color: var(--danger);
-            padding: 15px;
-            border-radius: var(--border-radius);
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        /* ========== LOADING ANIMATION ========== */
-        .loading-spinner {
-            display: none;
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(108, 99, 255, 0.2);
-            border-radius: 50%;
-            border-top-color: var(--primary);
-            animation: spin 1s ease-in-out infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Free online tool to remove image backgrounds with precision. Download transparent images instantly.">
+  <meta name="keywords" content="background remover, image background remover, transparent image maker, remove bg">
+  <title>AI-Powered Image Background Remover</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9f9f9;
+      color: #333;
+    }
+    header, footer {
+      background: #222;
+      color: #fff;
+      text-align: center;
+      padding: 1rem;
+    }
+    main {
+      max-width: 1200px;
+      margin: auto;
+      padding: 1rem;
+    }
+    .upload-container {
+      border: 2px dashed #ccc;
+      padding: 2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      background: #fff;
+    }
+    .upload-container.dragover {
+      background: #eef;
+    }
+    .preview {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+    .preview img {
+      max-width: 45%;
+      border: 1px solid #ddd;
+    }
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .buttons button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .ads {
+      margin: 2rem 0;
+      text-align: center;
+      background: #fff;
+      padding: 1rem;
+      border: 1px solid #ddd;
+    }
+    #loader {
+      display: none;
+      text-align: center;
+      margin: 2rem 0;
+    }
+  </style>
 </head>
 <body>
-    <!-- ========== HEADER ========== -->
-    <header>
-        <div class="container header-container">
-            <a href="/" class="logo">
-                <i class="fas fa-magic"></i>
-                <span>AI BG Remover Pro</span>
-            </a>
-            <nav>
-                <ul id="nav-menu">
-                    <li><a href="/">Home</a></li>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#how-it-works">How It Works</a></li>
-                    <li><a href="#faq">FAQ</a></li>
-                </ul>
-            </nav>
-            <button class="mobile-menu-btn" id="mobile-menu-btn">
-                <i class="fas fa-bars"></i>
-            </button>
-        </div>
-    </header>
+  <header>
+    <h1>AI-Powered Image Background Remover</h1>
+  </header>
+  <main>
+    <section class="upload-container" id="drop-zone">
+      <p>Drag & drop your image here or <input type="file" id="fileInput" accept="image/*"></p>
+    </section>
 
-    <!-- ========== AD BANNER - HEADER ========== -->
-    <div class="container">
-        <div class="ad-banner">
-            <div class="ad-label">Advertisement</div>
-            <!-- Google AdSense Ad Unit -->
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-YOUR_ADSENSE_ID"
-                 data-ad-slot="YOUR_AD_SLOT_ID"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
-            <script>
-                 (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
-        </div>
+    <div id="loader">Processing image, please wait...</div>
+
+    <div class="preview">
+      <img id="originalImg" src="#" alt="Original Preview" style="display:none;">
+      <img id="resultImg" src="#" alt="Processed Preview" style="display:none;">
     </div>
 
-    <!-- ========== MAIN CONTENT ========== -->
-    <main>
-        <div class="container">
-            <article>
-                <!-- Tool Header -->
-                <div class="tool-header">
-                    <h1>AI Background Remover</h1>
-                    <p>Upload any image to automatically remove the background with AI precision. No registration required.</p>
-                </div>
-
-                <!-- Error Message -->
-                <div class="error-message" id="error-message"></div>
-
-                <!-- Tool Container -->
-                <div class="tool-container">
-                    <!-- Upload Section -->
-                    <div class="upload-section">
-                        <div class="drop-area" id="drop-area">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <h3>Upload Your Image</h3>
-                            <p>Drag & drop or click to browse</p>
-                            <button class="btn">Select Image</button>
-                            <input type="file" id="file-input" accept="image/*">
-                        </div>
-                        <div class="preview-container transparent-bg" id="preview-container">
-                            <img id="original-preview" class="preview-image" alt="Original preview">
-                            <div class="preview-placeholder" id="preview-placeholder">
-                                <i class="fas fa-image" style="font-size: 48px; color: var(--gray); margin-bottom: 15px;"></i>
-                                <p>Preview will appear here</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Options Section -->
-                    <div class="options-section">
-                        <h3>Processing Options</h3>
-                        <div class="option-row">
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="watermark-toggle">
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <span>Add watermark to result</span>
-                        </div>
-                        <div class="option-row">
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="enhance-toggle" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <span>Enhance edges (recommended for hair/fur)</span>
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="btn-group">
-                        <button class="btn" id="process-btn" disabled>
-                            <i class="fas fa-magic"></i> Remove Background
-                        </button>
-                        <button class="btn btn-outline" id="reset-btn" disabled>
-                            <i class="fas fa-redo"></i> Reset
-                        </button>
-                    </div>
-
-                    <!-- Loading Spinner -->
-                    <div class="loading-spinner" id="loading-spinner"></div>
-
-                    <!-- Progress Bar -->
-                    <div class="progress-container" id="progress-container">
-                        <div class="progress-bar">
-                            <div class="progress" id="progress-bar"></div>
-                        </div>
-                        <p class="progress-text" id="progress-text">Processing: 0%</p>
-                    </div>
-                </div>
-
-                <!-- Results Section -->
-                <div class="results-section" id="results-section">
-                    <h2 style="text-align: center; margin-bottom: 30px;">Results</h2>
-                    
-                    <div class="comparison-container">
-                        <div class="image-panel">
-                            <h3>Original Image</h3>
-                            <img id="original-image" src="" alt="Original image">
-                            <div class="image-stats">
-                                <span id="original-format">Format: -</span>
-                                <span id="original-size">Size: -</span>
-                            </div>
-                        </div>
-                        <div class="image-panel transparent-bg">
-                            <h3>Background Removed</h3>
-                            <img id="result-image" src="" alt="Result image">
-                            <div class="image-stats">
-                                <span id="result-format">Format: PNG</span>
-                                <span id="result-size">Size: -</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="btn-group" style="justify-content: center; margin-top: 30px;">
-                        <button class="btn" id="download-btn">
-                            <i class="fas fa-download"></i> Download PNG
-                        </button>
-                        <button class="btn btn-outline" id="new-image-btn">
-                            <i class="fas fa-plus"></i> New Image
-                        </button>
-                    </div>
-                </div>
-            </article>
-
-            <!-- Features Section -->
-            <section id="features" style="margin: 60px 0;">
-                <h2 style="text-align: center; margin-bottom: 30px;">Key Features</h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
-                    <div style="background: white; padding: 30px; border-radius: var(--border-radius); box-shadow: var(--box-shadow);">
-                        <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                            <i class="fas fa-bolt" style="color: var(--primary);"></i> Instant Processing
-                        </h3>
-                        <p style="color: var(--gray);">Get results in seconds with our advanced AI technology.</p>
-                    </div>
-                    <div style="background: white; padding: 30px; border-radius: var(--border-radius); box-shadow: var(--box-shadow);">
-                        <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                            <i class="fas fa-cut" style="color: var(--primary);"></i> Precision Edges
-                        </h3>
-                        <p style="color: var(--gray);">Perfect results even for complex images with hair or fur.</p>
-                    </div>
-                    <div style="background: white; padding: 30px; border-radius: var(--border-radius); box-shadow: var(--box-shadow);">
-                        <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                            <i class="fas fa-lock" style="color: var(--primary);"></i> Privacy Focused
-                        </h3>
-                        <p style="color: var(--gray);">Your images are processed in your browser and never uploaded.</p>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </main>
-
-    <!-- ========== AD BANNER - FOOTER ========== -->
-    <div class="container">
-        <div class="ad-banner">
-            <div class="ad-label">Advertisement</div>
-            <!-- Google AdSense Ad Unit -->
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-YOUR_ADSENSE_ID"
-                 data-ad-slot="YOUR_AD_SLOT_ID"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
-            <script>
-                 (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
-        </div>
+    <div class="buttons">
+      <button id="resetBtn">Reset</button>
+      <button id="downloadBtn">Download PNG</button>
     </div>
 
-    <!-- ========== FOOTER ========== -->
-    <footer>
-        <div class="container">
-            <div class="footer-container">
-                <div class="footer-column">
-                    <h3>AI BG Remover Pro</h3>
-                    <p>The most advanced AI background remover tool online. Free to use with no watermarks.</p>
-                </div>
-                <div class="footer-column">
-                    <h3>Quick Links</h3>
-                    <ul>
-                        <li><a href="/">Home</a></li>
-                        <li><a href="#features">Features</a></li>
-                        <li><a href="#how-it-works">How It Works</a></li>
-                        <li><a href="#faq">FAQ</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h3>Legal</h3>
-                    <ul>
-                        <li><a href="#">Terms of Service</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Cookie Policy</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h3>Support</h3>
-                    <ul>
-                        <li><a href="#">Contact Us</a></li>
-                        <li><a href="#">Feedback</a></li>
-                        <li><a href="#">Report an Issue</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="copyright">
-                &copy; <span id="year"></span> AI BG Remover Pro. All rights reserved.
-            </div>
-        </div>
-    </footer>
+    <div class="ads">
+      <!-- Insert AdSense Code Here -->
+      <p>Advertisement</p>
+    </div>
+  </main>
+  <footer>
+    &copy; 2025 BackgroundRemoverPro.com | Powered by HTML, CSS & JS
+  </footer>
 
-    <!-- ========== JAVASCRIPT ========== -->
-    <script>
-        // DOM Elements
-        const dropArea = document.getElementById('drop-area');
-        const fileInput = document.getElementById('file-input');
-        const previewContainer = document.getElementById('preview-container');
-        const originalPreview = document.getElementById('original-preview');
-        const previewPlaceholder = document.getElementById('preview-placeholder');
-        const processBtn = document.getElementById('process-btn');
-        const resetBtn = document.getElementById('reset-btn');
-        const progressContainer = document.getElementById('progress-container');
-        const progressBar = document.getElementById('progress-bar');
-        const progressText = document.getElementById('progress-text');
-        const resultsSection = document.getElementById('results-section');
-        const originalImage = document.getElementById('original-image');
-        const resultImage = document.getElementById('result-image');
-        const originalFormat = document.getElementById('original-format');
-        const originalSize = document.getElementById('original-size');
-        const resultSize = document.getElementById('result-size');
-        const downloadBtn = document.getElementById('download-btn');
-        const newImageBtn = document.getElementById('new-image-btn');
-        const watermarkToggle = document.getElementById('watermark-toggle');
-        const enhanceToggle = document.getElementById('enhance-toggle');
-        const errorMessage = document.getElementById('error-message');
-        const loadingSpinner = document.getElementById('loading-spinner');
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-        const navMenu = document.getElementById('nav-menu');
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const dropZone = document.getElementById('drop-zone');
+    const originalImg = document.getElementById('originalImg');
+    const resultImg = document.getElementById('resultImg');
+    const loader = document.getElementById('loader');
+    const resetBtn = document.getElementById('resetBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
 
-        // Global Variables
-        let originalFile = null;
-        let resultFile = null;
-        let processing = false;
+    function simulateBackgroundRemoval(imageSrc) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(imageSrc); // Replace this with actual API logic or canvas processing.
+        }, 2000);
+      });
+    }
 
-        // Initialize
-        document.getElementById('year').textContent = new Date().getFullYear();
+    async function handleImageUpload(file) {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const src = e.target.result;
+        originalImg.src = src;
+        originalImg.style.display = 'block';
+        loader.style.display = 'block';
+        const processedSrc = await simulateBackgroundRemoval(src);
+        loader.style.display = 'none';
+        resultImg.src = processedSrc;
+        resultImg.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
 
-        // Mobile Menu Toggle
-        mobileMenuBtn.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
-        });
+    fileInput.addEventListener('change', (e) => {
+      handleImageUpload(e.target.files[0]);
+    });
 
-        // Event Listeners
-        dropArea.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', handleFileSelect);
-        processBtn.addEventListener('click', processImage);
-        resetBtn.addEventListener('click', resetTool);
-        downloadBtn.addEventListener('click', downloadResult);
-        newImageBtn.addEventListener('click', resetTool);
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      handleImageUpload(file);
+    });
 
-        // Drag and Drop Events
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, preventDefaults, false);
-        });
+    resetBtn.addEventListener('click', () => {
+      originalImg.src = resultImg.src = '#';
+      originalImg.style.display = resultImg.style.display = 'none';
+      fileInput.value = null;
+    });
 
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, highlight, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, unhighlight, false);
-        });
-
-        dropArea.addEventListener('drop', handleDrop, false);
-
-        // Functions
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        function highlight() {
-            dropArea.classList.add('active');
-        }
-
-        function unhighlight() {
-            dropArea.classList.remove('active');
-        }
-
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const file = dt.files[0];
-            if (file && file.type.startsWith('image/')) {
-                handleFile(file);
-            } else {
-                showError('Please select a valid image file (JPG, PNG, etc.)');
-            }
-        }
-
-        function handleFileSelect(e) {
-            const file = e.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                handleFile(file);
-            } else {
-                showError('Please select a valid image file (JPG, PNG, etc.)');
-            }
-        }
-
-        function handleFile(file) {
-            // Check file size (max 10MB)
-            if (file.size > 10 * 1024 * 1024) {
-                showError('File size too large (max 10MB)');
-                return;
-            }
-
-            originalFile = file;
-            
-            // Display preview
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                originalPreview.src = e.target.result;
-                originalPreview.style.display = 'block';
-                originalImage.src = e.target.result;
-                previewPlaceholder.style.display = 'none';
-                
-                // Get file info
-                const format = file.name.split('.').pop().toUpperCase();
-                originalFormat.textContent = `Format: ${format}`;
-                originalSize.textContent = `Size: ${formatFileSize(file.size)}`;
-            };
-            reader.readAsDataURL(file);
-            
-            // Enable buttons
-            processBtn.disabled = false;
-            resetBtn.disabled = false;
-            
-            // Hide results if showing
-            resultsSection.style.display = 'none';
-            
-            // Hide any previous errors
-            hideError();
-        }
-
-        async function processImage() {
-            if (!originalFile || processing) return;
-            
-            processing = true;
-            processBtn.disabled = true;
-            loadingSpinner.style.display = 'block';
-            
-            // Show progress
-            progressContainer.style.display = 'block';
-            progressBar.style.width = '0%';
-            progressText.textContent = 'Processing: 0%';
-            
-            try {
-                // Simulate AI processing (in a real app, this would call an API)
-                for (let i = 0; i <= 100; i += 2) {
-                    await new Promise(resolve => setTimeout(resolve, 50));
-                    progressBar.style.width = `${i}%`;
-                    progressText.textContent = `Processing: ${i}%`;
-                    
-                    // Simulate occasional slower processing for realism
-                    if (i > 80 && i < 95) {
-                        await new Promise(resolve => setTimeout(resolve, 200));
-                    }
-                }
-                
-                // Create canvas for processing
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                const img = new Image();
-                
-                img.onload = function() {
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    ctx.drawImage(img, 0, 0);
-                    
-                    // Simulate background removal (in real app, use AI API)
-                    simulateBackgroundRemoval(canvas, ctx, img.width, img.height);
-                    
-                    // Add watermark if enabled
-                    if (watermarkToggle.checked) {
-                        addWatermark(canvas, ctx);
-                    }
-                    
-                    // Convert to PNG
-                    canvas.toBlob(function(blob) {
-                        resultFile = new File([blob], `bgremoved_${originalFile.name.split('.')[0]}.png`, {
-                            type: 'image/png'
-                        });
-                        
-                        // Display result
-                        resultImage.src = URL.createObjectURL(blob);
-                        resultSize.textContent = `Size: ${formatFileSize(blob.size)}`;
-                        
-                        // Hide progress and show results
-                        progressContainer.style.display = 'none';
-                        loadingSpinner.style.display = 'none';
-                        resultsSection.style.display = 'block';
-                        processing = false;
-                        
-                        // Scroll to results
-                        resultsSection.scrollIntoView({ behavior: 'smooth' });
-                    }, 'image/png');
-                };
-                
-                img.src = URL.createObjectURL(originalFile);
-            } catch (error) {
-                showError('An error occurred during processing. Please try again.');
-                console.error('Processing error:', error);
-                resetProcessingState();
-            }
-        }
-
-        function simulateBackgroundRemoval(canvas, ctx, width, height) {
-            // This is a simplified simulation - real implementation would use AI
-            
-            // Create a gradient mask (simulating AI selection)
-            const gradient = ctx.createRadialGradient(
-                width / 2, height / 2, Math.min(width, height) * 0.3,
-                width / 2, height / 2, Math.min(width, height) * 0.5
-            );
-            
-            gradient.addColorStop(0, 'rgba(255,255,255,1)');
-            gradient.addColorStop(1, 'rgba(255,255,255,0)');
-            
-            // Apply edge enhancement if enabled
-            if (enhanceToggle.checked) {
-                ctx.filter = 'contrast(1.2)';
-                ctx.drawImage(canvas, 0, 0);
-                ctx.filter = 'none';
-            }
-            
-            // Create a temporary canvas for masking
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = width;
-            tempCanvas.height = height;
-            const tempCtx = tempCanvas.getContext('2d');
-            
-            // Apply gradient mask
-            tempCtx.fillStyle = gradient;
-            tempCtx.fillRect(0, 0, width, height);
-            
-            // Composite the original image with the mask
-            ctx.globalCompositeOperation = 'destination-in';
-            ctx.drawImage(tempCanvas, 0, 0);
-            ctx.globalCompositeOperation = 'source-over';
-        }
-
-        function addWatermark(canvas, ctx) {
-            ctx.font = 'bold 24px Arial';
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-            ctx.textAlign = 'center';
-            ctx.fillText('BGremoverPro', canvas.width / 2, canvas.height - 30);
-        }
-
-        function resetTool() {
-            // Reset file input
-            fileInput.value = '';
-            originalFile = null;
-            resultFile = null;
-            
-            // Reset preview
-            originalPreview.src = '';
-            originalPreview.style.display = 'none';
-            previewPlaceholder.style.display = 'block';
-            
-            // Reset results
-            originalImage.src = '';
-            resultImage.src = '';
-            originalFormat.textContent = 'Format: -';
-            originalSize.textContent = 'Size: -';
-            resultSize.textContent = 'Size: -';
-            resultsSection.style.display = 'none';
-            
-            // Reset progress
-            progressContainer.style.display = 'none';
-            progressBar.style.width = '0%';
-            progressText.textContent = 'Processing: 0%';
-            loadingSpinner.style.display = 'none';
-            
-            // Reset buttons
-            processBtn.disabled = true;
-            resetBtn.disabled = true;
-            processing = false;
-            
-            // Hide any errors
-            hideError();
-        }
-
-        function resetProcessingState() {
-            progressContainer.style.display = 'none';
-            loadingSpinner.style.display =
+    downloadBtn.addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = 'removed-background.png';
+      link.href = resultImg.src;
+      link.click();
+    });
+  </script>
+</body>
+</html>
