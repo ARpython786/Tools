@@ -3,858 +3,352 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Background Remover</title>
+    <title>Background Remover</title>
     <style>
         :root {
             --primary: #4361ee;
-            --secondary: #3f37c9;
             --light: #f8f9fa;
             --dark: #212529;
-            --success: #4cc9f0;
-            --warning: #f8961e;
             --danger: #f94144;
         }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
         body {
             background-color: #f5f7fa;
             color: var(--dark);
-            line-height: 1.6;
         }
-
         .container {
-            max-width: 1200px;
+            max-width: 800px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 1rem;
         }
-
         header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin: 1rem 0;
         }
-
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
             color: var(--primary);
+            margin-bottom: 0.5rem;
         }
-
-        .subtitle {
-            color: #6c757d;
-            font-size: 1.1rem;
-        }
-
-        .tool-container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            margin-bottom: 2rem;
-        }
-
-        .tool-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid #e9ecef;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .tool-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-        }
-
-        .tool-body {
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-
         .upload-area {
             border: 2px dashed #ced4da;
             border-radius: 8px;
-            padding: 3rem 2rem;
+            padding: 2rem;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
+            margin-bottom: 1rem;
+            background: white;
         }
-
         .upload-area:hover {
             border-color: var(--primary);
-            background-color: rgba(67, 97, 238, 0.05);
         }
-
-        .upload-area.active {
-            border-color: var(--success);
-            background-color: rgba(76, 201, 240, 0.05);
-        }
-
-        .upload-icon {
-            font-size: 3rem;
-            color: var(--primary);
-            margin-bottom: 1rem;
-        }
-
-        .upload-text {
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-
-        .upload-hint {
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-
         #fileInput {
             display: none;
         }
-
         .btn {
-            display: inline-block;
-            padding: 0.6rem 1.2rem;
-            border-radius: 6px;
-            font-weight: 500;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-            font-size: 1rem;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--secondary);
-        }
-
-        .btn-outline {
-            background-color: transparent;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-        }
-
-        .btn-outline:hover {
-            background-color: rgba(67, 97, 238, 0.1);
-        }
-
-        .btn-disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .processing-area {
-            display: none;
-        }
-
-        .image-comparison {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        @media (min-width: 768px) {
-            .image-comparison {
-                flex-direction: row;
-            }
-        }
-
-        .image-container {
-            flex: 1;
-            position: relative;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .image-label {
-            position: absolute;
-            top: 0;
-            left: 0;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
             padding: 0.5rem 1rem;
-            border-bottom-right-radius: 8px;
-            font-size: 0.9rem;
+            border-radius: 4px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+            margin: 0.5rem;
         }
-
-        .image-wrapper {
-            width: 100%;
-            padding-top: 100%;
-            position: relative;
-            background-color: #f8f9fa;
-            background-image: linear-gradient(45deg, #e9ecef 25%, transparent 25%, transparent 75%, #e9ecef 75%, #e9ecef),
-                              linear-gradient(45deg, #e9ecef 25%, transparent 25%, transparent 75%, #e9ecef 75%, #e9ecef);
-            background-size: 20px 20px;
-            background-position: 0 0, 10px 10px;
-        }
-
-        .image-wrapper img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .result-actions {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
+        .result-area {
+            display: none;
             margin-top: 1rem;
         }
-
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.8);
+        .image-container {
             display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            display: none;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(67, 97, 238, 0.2);
-            border-radius: 50%;
-            border-top-color: var(--primary);
-            animation: spin 1s ease-in-out infinite;
+            flex-wrap: wrap;
+            gap: 1rem;
             margin-bottom: 1rem;
         }
-
+        .image-box {
+            flex: 1;
+            min-width: 300px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .image-box img {
+            width: 100%;
+            display: block;
+        }
+        .loading {
+            text-align: center;
+            padding: 1rem;
+            display: none;
+        }
+        .spinner {
+            border: 4px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-
-        .loading-text {
-            font-size: 1.2rem;
-            color: var(--dark);
-            margin-bottom: 1rem;
-        }
-
-        .progress-bar {
-            width: 200px;
-            height: 10px;
-            background-color: #e9ecef;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-
-        .progress {
-            height: 100%;
-            background-color: var(--primary);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .error-message {
+        .error {
             color: var(--danger);
-            background-color: rgba(248, 65, 68, 0.1);
             padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            display: none;
-        }
-
-        .brush-controls {
-            display: none;
-            margin-top: 1rem;
-            padding: 1rem;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .slider-container {
-            margin-bottom: 1rem;
-        }
-
-        .slider-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-
-        .slider {
-            width: 100%;
-            height: 8px;
-            border-radius: 4px;
-            background: #e9ecef;
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: var(--primary);
-            cursor: pointer;
-        }
-
-        .brush-modes {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .brush-mode-btn {
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .brush-mode-btn.active {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        footer {
             text-align: center;
-            margin-top: 3rem;
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            .tool-body {
-                padding: 1rem;
-            }
-            
-            .btn-group {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-            }
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>AI Background Remover</h1>
-            <p class="subtitle">Remove image backgrounds automatically with high precision</p>
+            <h1>Background Remover</h1>
+            <p>Remove backgrounds from images 100% in your browser</p>
         </header>
 
-        <div class="tool-container">
-            <div class="tool-header">
-                <div class="tool-title">Upload Image</div>
-            </div>
-            <div class="tool-body">
-                <div class="error-message" id="errorMessage"></div>
-                
-                <div class="upload-area" id="uploadArea">
-                    <div class="upload-icon">📁</div>
-                    <div class="upload-text">Drag & drop your image here</div>
-                    <div class="upload-hint">or click to browse files (PNG, JPG, JPEG up to 5MB)</div>
-                    <input type="file" id="fileInput" accept="image/png, image/jpeg, image/jpg">
-                </div>
-
-                <div class="processing-area" id="processingArea">
-                    <div class="image-comparison">
-                        <div class="image-container">
-                            <div class="image-label">Original</div>
-                            <div class="image-wrapper">
-                                <img id="originalImage" src="" alt="Original Image">
-                            </div>
-                        </div>
-                        <div class="image-container">
-                            <div class="image-label">Result</div>
-                            <div class="image-wrapper">
-                                <img id="resultImage" src="" alt="Result Image">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="brush-controls" id="brushControls">
-                        <div class="slider-container">
-                            <label class="slider-label">Brush Size</label>
-                            <input type="range" min="1" max="50" value="10" class="slider" id="brushSize">
-                        </div>
-                        <div class="brush-modes">
-                            <div class="brush-mode-btn active" data-mode="add">Add to Mask</div>
-                            <div class="brush-mode-btn" data-mode="remove">Remove from Mask</div>
-                        </div>
-                        <canvas id="maskCanvas" style="display: none;"></canvas>
-                    </div>
-
-                    <div class="result-actions">
-                        <button class="btn btn-outline" id="adjustBtn">Adjust Mask</button>
-                        <button class="btn btn-primary" id="downloadBtn">Download PNG</button>
-                        <button class="btn btn-outline" id="newImageBtn">New Image</button>
-                    </div>
-                </div>
-            </div>
+        <div class="upload-area" id="uploadArea">
+            <p>Click to upload or drag & drop image</p>
+            <p>PNG, JPG up to 5MB</p>
+            <input type="file" id="fileInput" accept="image/png, image/jpeg">
         </div>
 
-        <footer>
-            <p>All image processing happens in your browser. Your images are never uploaded to any server.</p>
-        </footer>
-    </div>
+        <div class="error" id="error"></div>
 
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-        <div class="loading-text" id="loadingText">Loading AI Model...</div>
-        <div class="progress-bar">
-            <div class="progress" id="progressBar"></div>
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p id="loadingText">Loading AI model...</p>
+        </div>
+
+        <div class="result-area" id="resultArea">
+            <div class="image-container">
+                <div class="image-box">
+                    <p>Original</p>
+                    <img id="originalImage">
+                </div>
+                <div class="image-box">
+                    <p>Result</p>
+                    <img id="resultImage">
+                </div>
+            </div>
+            <button class="btn" id="downloadBtn">Download PNG</button>
+            <button class="btn" id="resetBtn">New Image</button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.16.0/dist/ort.min.js"></script>
     <script>
-        // Global variables
-        let model = null;
-        let originalImageData = null;
-        let maskData = null;
-        let isModelLoaded = false;
-        let isProcessing = false;
-        let brushMode = 'add';
-        let isDrawing = false;
-        let lastX = 0;
-        let lastY = 0;
-
         // DOM elements
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
-        const processingArea = document.getElementById('processingArea');
+        const loading = document.getElementById('loading');
+        const loadingText = document.getElementById('loadingText');
+        const error = document.getElementById('error');
+        const resultArea = document.getElementById('resultArea');
         const originalImage = document.getElementById('originalImage');
         const resultImage = document.getElementById('resultImage');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const loadingText = document.getElementById('loadingText');
-        const progressBar = document.getElementById('progressBar');
-        const errorMessage = document.getElementById('errorMessage');
         const downloadBtn = document.getElementById('downloadBtn');
-        const adjustBtn = document.getElementById('adjustBtn');
-        const newImageBtn = document.getElementById('newImageBtn');
-        const brushControls = document.getElementById('brushControls');
-        const brushSize = document.getElementById('brushSize');
-        const maskCanvas = document.getElementById('maskCanvas');
-        const brushModeBtns = document.querySelectorAll('.brush-mode-btn');
+        const resetBtn = document.getElementById('resetBtn');
 
-        // Event listeners
+        // Model variables
+        let model = null;
+        const modelPath = 'https://huggingface.co/briaai/RMBG-1.4/resolve/main/model_quantized.onnx';
+
+        // Initialize
         uploadArea.addEventListener('click', () => fileInput.click());
-        uploadArea.addEventListener('dragover', handleDragOver);
-        uploadArea.addEventListener('dragleave', handleDragLeave);
-        uploadArea.addEventListener('drop', handleDrop);
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#4361ee';
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#ced4da';
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#ced4da';
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect();
+            }
+        });
         fileInput.addEventListener('change', handleFileSelect);
         downloadBtn.addEventListener('click', downloadResult);
-        adjustBtn.addEventListener('click', toggleBrushControls);
-        newImageBtn.addEventListener('click', resetTool);
-        brushSize.addEventListener('input', updateBrushSize);
-        brushModeBtns.forEach(btn => btn.addEventListener('click', setBrushMode));
+        resetBtn.addEventListener('click', reset);
 
-        // Mask canvas events
-        maskCanvas.addEventListener('mousedown', startDrawing);
-        maskCanvas.addEventListener('mousemove', draw);
-        maskCanvas.addEventListener('mouseup', stopDrawing);
-        maskCanvas.addEventListener('mouseout', stopDrawing);
-        maskCanvas.addEventListener('touchstart', handleTouchStart);
-        maskCanvas.addEventListener('touchmove', handleTouchMove);
-        maskCanvas.addEventListener('touchend', stopDrawing);
+        // Load model on startup
+        loadModel();
 
-        // Initialize the app
-        init();
-
-        async function init() {
-            showLoading('Loading AI model...');
-            
+        async function loadModel() {
+            showLoading('Loading AI model (4.7MB)...');
             try {
-                // Load the U-2-Net model
-                const modelPath = 'https://models.backgroundremover.app/u2net.onnx';
-                
-                // Show progress updates
-                const progressCallback = (progress) => {
-                    const percent = Math.floor(progress * 100);
-                    progressBar.style.width = `${percent}%`;
-                    loadingText.textContent = `Downloading model... ${percent}%`;
-                };
-                
-                // Create a session with the model
                 model = await ort.InferenceSession.create(modelPath, {
-                    progress: progressCallback
+                    executionProviders: ['wasm']
                 });
-                
-                isModelLoaded = true;
                 hideLoading();
-            } catch (error) {
-                showError(`Failed to load AI model: ${error.message}`);
-                hideLoading();
-                console.error('Model loading error:', error);
+            } catch (err) {
+                showError('Failed to initialize. Please refresh and try again.');
+                console.error('Model loading error:', err);
             }
         }
 
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            uploadArea.classList.add('active');
-        }
-
-        function handleDragLeave(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            uploadArea.classList.remove('active');
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            uploadArea.classList.remove('active');
-
-            const files = e.dataTransfer.files;
-            if (files.length > 0 && files[0].type.match('image.*')) {
-                fileInput.files = files;
-                handleFileSelect({ target: fileInput });
-            }
-        }
-
-        function handleFileSelect(e) {
-            const file = e.target.files[0];
+        async function handleFileSelect() {
+            const file = fileInput.files[0];
             if (!file) return;
 
-            // Check file type
+            // Validate file
             if (!file.type.match('image.*')) {
-                showError('Please select an image file (PNG, JPG, JPEG)');
+                showError('Please select an image file (PNG, JPG)');
                 return;
             }
-
-            // Check file size (5MB limit)
             if (file.size > 5 * 1024 * 1024) {
-                showError('Image size should be less than 5MB');
+                showError('Image must be smaller than 5MB');
                 return;
             }
 
             const reader = new FileReader();
-            reader.onload = async (event) => {
-                try {
-                    const img = new Image();
-                    img.onload = async () => {
-                        // Check image dimensions
-                        if (img.width > 2000 || img.height > 2000) {
-                            showError('Image dimensions should be less than 2000x2000 pixels');
-                            return;
-                        }
-
-                        originalImage.src = event.target.result;
-                        originalImageData = img;
-                        
-                        // Show processing area
-                        uploadArea.style.display = 'none';
-                        processingArea.style.display = 'block';
-                        
-                        // Process the image
-                        await processImage(img);
-                    };
-                    img.src = event.target.result;
-                } catch (error) {
-                    showError(`Error loading image: ${error.message}`);
-                    console.error('Image loading error:', error);
-                }
+            reader.onload = async (e) => {
+                const img = new Image();
+                img.onload = async () => {
+                    if (img.width > 2000 || img.height > 2000) {
+                        showError('Image dimensions must be under 2000x2000px');
+                        return;
+                    }
+                    originalImage.src = e.target.result;
+                    await processImage(img);
+                };
+                img.src = e.target.result;
             };
             reader.readAsDataURL(file);
         }
 
         async function processImage(img) {
-            if (!isModelLoaded || isProcessing) return;
-            isProcessing = true;
-            
+            if (!model) {
+                showError('AI model not loaded yet');
+                return;
+            }
+
             showLoading('Removing background...');
             
             try {
-                // Prepare the image for the model
-                const { tensor, width, height } = prepareImageForModel(img);
+                // Prepare input tensor
+                const { tensor, width, height } = prepareImageTensor(img);
                 
-                // Run the model
-                const feeds = { input: tensor };
-                const results = await model.run(feeds);
-                const output = results.output;
+                // Run model
+                const results = await model.run({ input: tensor });
+                const mask = results.output;
                 
-                // Process the output mask
-                const mask = await processMask(output, width, height);
+                // Create transparent result
+                const resultUrl = createResultImage(img, mask, width, height);
                 
-                // Apply the mask to the original image
-                const resultUrl = applyMaskToImage(img, mask);
-                
-                // Display the result
+                // Show result
                 resultImage.src = resultUrl;
-                maskData = mask;
-                
+                resultArea.style.display = 'block';
                 hideLoading();
-                isProcessing = false;
-            } catch (error) {
-                showError(`Background removal failed: ${error.message}`);
-                hideLoading();
-                isProcessing = false;
-                console.error('Processing error:', error);
+            } catch (err) {
+                showError('Processing failed. Try a different image.');
+                console.error('Processing error:', err);
             }
         }
 
-        function prepareImageForModel(img) {
+        function prepareImageTensor(img) {
             const width = img.width;
             const height = img.height;
-            
-            // Create a canvas to resize the image to a square while maintaining aspect ratio
             const canvas = document.createElement('canvas');
-            const size = Math.min(1024, Math.max(width, height));
+            const ctx = canvas.getContext('2d');
+            
+            // Resize to model input size (1024x1024)
+            const size = 1024;
             canvas.width = size;
             canvas.height = size;
             
-            const ctx = canvas.getContext('2d');
-            
-            // Fill with white background
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, size, size);
-            
-            // Calculate dimensions to center the image
-            const ratio = Math.min(size / width, size / height);
-            const newWidth = width * ratio;
-            const newHeight = height * ratio;
+            // Draw image centered and scaled
+            const scale = Math.min(size / width, size / height);
+            const newWidth = width * scale;
+            const newHeight = height * scale;
             const x = (size - newWidth) / 2;
             const y = (size - newHeight) / 2;
             
-            // Draw the image
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, size, size);
             ctx.drawImage(img, x, y, newWidth, newHeight);
             
-            // Get image data
-            const imageData = ctx.getImageData(0, 0, size, size);
-            
             // Convert to tensor
+            const imageData = ctx.getImageData(0, 0, size, size);
             const data = new Float32Array(size * size * 3);
             
             for (let i = 0; i < size * size; i++) {
-                data[i] = imageData.data[i * 4] / 255; // R
+                data[i] = imageData.data[i * 4] / 255;         // R
                 data[i + size * size] = imageData.data[i * 4 + 1] / 255; // G
-                data[i + size * size * 2] = imageData.data[i * 4 + 2] / 255; // B
+                data[i + 2 * size * size] = imageData.data[i * 4 + 2] / 255; // B
             }
             
-            const tensor = new ort.Tensor('float32', data, [1, 3, size, size]);
-            
-            return { tensor, width, height };
+            return {
+                tensor: new ort.Tensor('float32', data, [1, 3, size, size]),
+                width,
+                height
+            };
         }
 
-        async function processMask(output, originalWidth, originalHeight) {
-            const size = output.dims[2];
-            const outputData = output.data;
-            
-            // Create a canvas to process the mask
+        function createResultImage(img, mask, width, height) {
             const canvas = document.createElement('canvas');
-            canvas.width = size;
-            canvas.height = size;
+            canvas.width = width;
+            canvas.height = height;
             const ctx = canvas.getContext('2d');
             
-            // Create image data from the output
-            const imageData = ctx.createImageData(size, size);
-            
-            for (let i = 0; i < size * size; i++) {
-                // The model outputs a value between 0 and 1 for each pixel
-                // We'll use this as the alpha value
-                const val = (1 - outputData[i]) * 255; // Invert and scale to 0-255
-                imageData.data[i * 4] = 0; // R
-                imageData.data[i * 4 + 1] = 0; // G
-                imageData.data[i * 4 + 2] = 0; // B
-                imageData.data[i * 4 + 3] = val; // A
-            }
-            
-            ctx.putImageData(imageData, 0, 0);
-            
-            // Resize back to original dimensions
-            const resizedCanvas = document.createElement('canvas');
-            resizedCanvas.width = originalWidth;
-            resizedCanvas.height = originalHeight;
-            const resizedCtx = resizedCanvas.getContext('2d');
-            
-            // Draw the mask resized to original dimensions
-            resizedCtx.drawImage(canvas, 0, 0, size, size, 0, 0, originalWidth, originalHeight);
-            
-            // Get the mask data
-            const maskData = resizedCtx.getImageData(0, 0, originalWidth, originalHeight);
-            
-            // Initialize mask canvas for editing
-            maskCanvas.width = originalWidth;
-            maskCanvas.height = originalHeight;
-            const maskCtx = maskCanvas.getContext('2d');
-            maskCtx.putImageData(maskData, 0, 0);
-            
-            return maskData;
-        }
-
-        function applyMaskToImage(img, maskData) {
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext('2d');
-            
-            // Draw the original image
+            // Draw original image
             ctx.drawImage(img, 0, 0);
             
-            // Apply the mask
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            // Apply mask
+            const imageData = ctx.getImageData(0, 0, width, height);
+            const maskData = new Uint8Array(mask.data);
             
-            for (let i = 0; i < maskData.data.length; i += 4) {
-                // Use the mask's alpha channel to set the image's alpha
-                imageData.data[i + 3] = maskData.data[i + 3];
+            for (let i = 0; i < width * height; i++) {
+                // Use mask to set alpha channel (0 = transparent)
+                imageData.data[i * 4 + 3] = maskData[i] > 0.5 ? 255 : 0;
             }
             
             ctx.putImageData(imageData, 0, 0);
-            
             return canvas.toDataURL('image/png');
         }
 
         function downloadResult() {
-            if (!resultImage.src) return;
-            
             const link = document.createElement('a');
             link.href = resultImage.src;
-            link.download = 'background_removed.png';
+            link.download = 'no-bg.png';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
 
-        function toggleBrushControls() {
-            if (brushControls.style.display === 'block') {
-                brushControls.style.display = 'none';
-                adjustBtn.textContent = 'Adjust Mask';
-            } else {
-                brushControls.style.display = 'block';
-                adjustBtn.textContent = 'Finish Editing';
-                
-                // Initialize brush preview
-                updateBrushSize();
-            }
-        }
-
-        function setBrushMode(e) {
-            brushMode = e.target.dataset.mode;
-            brushModeBtns.forEach(btn => btn.classList.remove('active'));
-            e.target.classList.add('active');
-        }
-
-        function updateBrushSize() {
-            // You could add a brush preview here if needed
-        }
-
-        function startDrawing(e) {
-            isDrawing = true;
-            const rect = maskCanvas.getBoundingClientRect();
-            lastX = (e.clientX || e.touches[0].clientX) - rect.left;
-            lastY = (e.clientY || e.touches[0].clientY) - rect.top;
-            draw(e);
-        }
-
-        function handleTouchStart(e) {
-            e.preventDefault();
-            startDrawing(e);
-        }
-
-        function draw(e) {
-            if (!isDrawing) return;
-            
-            const rect = maskCanvas.getBoundingClientRect();
-            const currentX = (e.clientX || e.touches[0].clientX) - rect.left;
-            const currentY = (e.clientY || e.touches[0].clientY) - rect.top;
-            
-            const ctx = maskCanvas.getContext('2d');
-            ctx.lineJoin = 'round';
-            ctx.lineCap = 'round';
-            ctx.globalCompositeOperation = brushMode === 'add' ? 'source-over' : 'destination-out';
-            
-            const brushSizeValue = parseInt(brushSize.value);
-            ctx.lineWidth = brushSizeValue;
-            ctx.strokeStyle = brushMode === 'add' ? 'rgba(0, 0, 0, 255)' : 'rgba(0, 0, 0, 0)';
-            
-            ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(currentX, currentY);
-            ctx.stroke();
-            
-            lastX = currentX;
-            lastY = currentY;
-            
-            // Update the result image
-            updateResultWithMask();
-        }
-
-        function handleTouchMove(e) {
-            e.preventDefault();
-            draw(e);
-        }
-
-        function stopDrawing() {
-            isDrawing = false;
-        }
-
-        function updateResultWithMask() {
-            if (!originalImageData || !maskData) return;
-            
-            // Get the updated mask from the canvas
-            const ctx = maskCanvas.getContext('2d');
-            const updatedMask = ctx.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
-            
-            // Apply the updated mask to the image
-            const resultUrl = applyMaskToImage(originalImageData, updatedMask);
-            resultImage.src = resultUrl;
-        }
-
-        function resetTool() {
-            uploadArea.style.display = 'block';
-            processingArea.style.display = 'none';
-            brushControls.style.display = 'none';
-            originalImage.src = '';
-            resultImage.src = '';
+        function reset() {
             fileInput.value = '';
-            maskData = null;
+            resultArea.style.display = 'none';
             hideError();
         }
 
-        function showLoading(message) {
-            loadingText.textContent = message;
-            loadingOverlay.style.display = 'flex';
+        function showLoading(text) {
+            loadingText.textContent = text;
+            loading.style.display = 'block';
+            error.style.display = 'none';
         }
 
         function hideLoading() {
-            loadingOverlay.style.display = 'none';
+            loading.style.display = 'none';
         }
 
         function showError(message) {
-            errorMessage.textContent = message;
-            errorMessage.style.display = 'block';
+            error.textContent = message;
+            error.style.display = 'block';
+            hideLoading();
         }
 
         function hideError() {
-            errorMessage.style.display = 'none';
+            error.style.display = 'none';
         }
     </script>
 </body>
