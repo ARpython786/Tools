@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Background Remover</title>
+    <title>Professional Background Remover</title>
     <style>
         :root {
             --primary: #4f46e5;
@@ -48,45 +48,15 @@
             margin-bottom: 1rem;
         }
         
-        .subtitle {
-            color: var(--gray);
-            font-size: 1.1rem;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        .tool-container {
-            background: white;
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-            margin-bottom: 2rem;
-        }
-        
-        .tool-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid #f3f4f6;
-        }
-        
-        .tool-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--dark);
-        }
-        
-        .upload-container {
-            padding: 3rem 2rem;
-            text-align: center;
-        }
-        
         .upload-area {
             border: 2px dashed #d1d5db;
             border-radius: 0.75rem;
             padding: 3rem;
+            text-align: center;
             cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
             background-color: #f9fafb;
+            transition: all 0.2s;
+            margin-bottom: 2rem;
         }
         
         .upload-area:hover {
@@ -94,44 +64,18 @@
             background-color: rgba(79, 70, 229, 0.03);
         }
         
-        .upload-area.active {
-            border-color: var(--success);
-            background-color: rgba(16, 185, 129, 0.03);
-        }
-        
-        .upload-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: var(--primary);
-        }
-        
-        .upload-text {
-            font-size: 1.125rem;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            color: var(--dark);
-        }
-        
-        .upload-hint {
-            color: var(--gray);
-            font-size: 0.875rem;
-        }
-        
         #fileInput {
             display: none;
         }
         
         .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.625rem 1.25rem;
+            padding: 0.75rem 1.5rem;
             border-radius: 0.5rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
             border: none;
-            font-size: 0.9375rem;
+            font-size: 1rem;
         }
         
         .btn-primary {
@@ -139,76 +83,66 @@
             color: white;
         }
         
-        .btn-primary:hover {
-            background-color: var(--secondary);
+        .result-area {
+            display: none;
+            margin-top: 2rem;
         }
         
-        .btn-outline {
-            background-color: transparent;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-        }
-        
-        .btn-outline:hover {
-            background-color: rgba(79, 70, 229, 0.1);
-        }
-        
-        .btn-group {
+        .image-comparison {
             display: flex;
-            gap: 1rem;
             flex-wrap: wrap;
+            gap: 2rem;
             justify-content: center;
         }
         
-        .result-container {
-            display: none;
-            padding: 2rem;
-        }
-        
-        .comparison {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-        
-        @media (min-width: 768px) {
-            .comparison {
-                flex-direction: row;
-            }
-        }
-        
-        .image-panel {
+        .image-box {
             flex: 1;
-            min-width: 0;
-        }
-        
-        .image-wrapper {
-            position: relative;
+            min-width: 300px;
+            max-width: 500px;
             border-radius: 0.75rem;
             overflow: hidden;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             background-color: white;
-            background-image: linear-gradient(45deg, #f3f4f6 25%, transparent 25%, transparent 75%, #f3f4f6 75%, #f3f4f6),
-                            linear-gradient(45deg, #f3f4f6 25%, transparent 25%, transparent 75%, #f3f4f6 75%, #f3f4f6);
+            background-image: 
+                linear-gradient(45deg, #f3f4f6 25%, transparent 25%, transparent 75%, #f3f4f6 75%, #f3f4f6),
+                linear-gradient(45deg, #f3f4f6 25%, transparent 25%, transparent 75%, #f3f4f6 75%, #f3f4f6);
             background-size: 20px 20px;
             background-position: 0 0, 10px 10px;
         }
         
-        .image-wrapper img {
-            display: block;
+        .image-box img {
             width: 100%;
-            height: auto;
+            display: block;
         }
         
-        .image-label {
-            position: absolute;
-            top: 0;
-            left: 0;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-bottom-right-radius: 0.75rem;
-            font-size: 0.875rem;
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            display: none;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(79, 70, 229, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error {
+            color: var(--error);
+            padding: 1rem;
+            text-align: center;
+            background-color: rgba(239, 68, 68, 0.1);
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: none;
         }
         
         .actions {
@@ -218,257 +152,108 @@
             margin-top: 2rem;
             flex-wrap: wrap;
         }
-        
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            display: none;
-        }
-        
-        .spinner {
-            width: 3rem;
-            height: 3rem;
-            border: 4px solid rgba(79, 70, 229, 0.1);
-            border-radius: 50%;
-            border-top-color: var(--primary);
-            animation: spin 1s linear infinite;
-            margin-bottom: 1.5rem;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .loading-text {
-            font-size: 1.125rem;
-            font-weight: 500;
-            color: var(--dark);
-            margin-bottom: 1rem;
-        }
-        
-        .progress-bar {
-            width: 200px;
-            height: 6px;
-            background-color: #e5e7eb;
-            border-radius: 3px;
-            overflow: hidden;
-        }
-        
-        .progress {
-            height: 100%;
-            background-color: var(--primary);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-        
-        .error-message {
-            color: var(--error);
-            background-color: rgba(239, 68, 68, 0.1);
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1.5rem;
-            display: none;
-            text-align: center;
-        }
-        
-        footer {
-            text-align: center;
-            margin-top: 3rem;
-            color: var(--gray);
-            font-size: 0.875rem;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 1.5rem 1rem;
-            }
-            
-            header {
-                margin-bottom: 2rem;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .upload-area {
-                padding: 2rem 1rem;
-            }
-            
-            .result-container {
-                padding: 1.5rem;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>AI Background Remover</h1>
-            <p class="subtitle">Upload an image to remove the background automatically with high precision</p>
+            <h1>Professional Background Remover</h1>
+            <p>Remove backgrounds from any image with AI</p>
         </header>
 
-        <div class="tool-container">
-            <div class="tool-header">
-                <div class="tool-title">Remove Background</div>
-            </div>
-            
-            <div class="upload-container">
-                <div class="error-message" id="errorMessage"></div>
-                
-                <div class="upload-area" id="uploadArea">
-                    <div class="upload-icon">📷</div>
-                    <div class="upload-text">Drag & drop image here</div>
-                    <div class="upload-hint">or click to browse files (JPEG, PNG up to 5MB)</div>
-                    <input type="file" id="fileInput" accept="image/jpeg, image/png">
+        <div class="upload-area" id="uploadArea">
+            <p>📁 Drag & drop image or click to browse</p>
+            <p><small>Supports JPG, PNG up to 5MB</small></p>
+            <input type="file" id="fileInput" accept="image/jpeg, image/png">
+        </div>
+
+        <div class="error" id="error"></div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p id="loadingText">Loading AI model...</p>
+        </div>
+
+        <div class="result-area" id="resultArea">
+            <div class="image-comparison">
+                <div class="image-box">
+                    <p>Original</p>
+                    <img id="originalImage">
+                </div>
+                <div class="image-box">
+                    <p>Result</p>
+                    <img id="resultImage">
                 </div>
             </div>
-            
-            <div class="result-container" id="resultContainer">
-                <div class="comparison">
-                    <div class="image-panel">
-                        <div class="image-wrapper">
-                            <div class="image-label">Original</div>
-                            <img id="originalImage" alt="Original image">
-                        </div>
-                    </div>
-                    <div class="image-panel">
-                        <div class="image-wrapper">
-                            <div class="image-label">Result</div>
-                            <img id="resultImage" alt="Result image">
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="actions">
-                    <button class="btn btn-primary" id="downloadBtn">
-                        <span>Download PNG</span>
-                    </button>
-                    <button class="btn btn-outline" id="newImageBtn">
-                        <span>New Image</span>
-                    </button>
-                </div>
+            <div class="actions">
+                <button class="btn btn-primary" id="downloadBtn">Download PNG</button>
+                <button class="btn" id="resetBtn">Try Another</button>
             </div>
         </div>
-        
-        <footer>
-            <p>All image processing happens in your browser. Your images are never uploaded to any server.</p>
-        </footer>
     </div>
 
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-        <div class="loading-text" id="loadingText">Loading AI model...</div>
-        <div class="progress-bar">
-            <div class="progress" id="progressBar"></div>
-        </div>
-    </div>
+    <!-- Load TensorFlow.js and the model -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-segmentation@1.0.0/dist/body-segmentation.min.js"></script>
 
     <script>
         // DOM elements
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
-        const errorMessage = document.getElementById('errorMessage');
-        const resultContainer = document.getElementById('resultContainer');
+        const loading = document.getElementById('loading');
+        const loadingText = document.getElementById('loadingText');
+        const error = document.getElementById('error');
+        const resultArea = document.getElementById('resultArea');
         const originalImage = document.getElementById('originalImage');
         const resultImage = document.getElementById('resultImage');
         const downloadBtn = document.getElementById('downloadBtn');
-        const newImageBtn = document.getElementById('newImageBtn');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const loadingText = document.getElementById('loadingText');
-        const progressBar = document.getElementById('progressBar');
+        const resetBtn = document.getElementById('resetBtn');
 
-        // State variables
+        // Model variables
         let model = null;
         let isProcessing = false;
 
-        // Event listeners
+        // Initialize
         uploadArea.addEventListener('click', () => fileInput.click());
-        uploadArea.addEventListener('dragover', handleDragOver);
-        uploadArea.addEventListener('dragleave', handleDragLeave);
-        uploadArea.addEventListener('drop', handleDrop);
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = var(--primary);
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#d1d5db';
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#d1d5db';
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect();
+            }
+        });
         fileInput.addEventListener('change', handleFileSelect);
         downloadBtn.addEventListener('click', downloadResult);
-        newImageBtn.addEventListener('click', resetTool);
+        resetBtn.addEventListener('click', reset);
 
-        // Initialize
+        // Load model on startup
         loadModel();
 
         async function loadModel() {
-            showLoading('Loading AI model...');
-            
+            showLoading('Loading AI model (this may take a minute)...');
             try {
-                // Load TensorFlow.js and the model
-                await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js');
-                await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.0.5/dist/body-pix.min.js');
-                
-                // Initialize the model
-                updateProgress(30);
-                loadingText.textContent = 'Initializing model...';
-                
-                model = await bodyPix.load({
-                    architecture: 'MobileNetV1',
-                    outputStride: 16,
-                    multiplier: 0.75,
-                    quantBytes: 2
+                // Load the model
+                model = await bodySegmentation.createSegmenter(bodySegmentation.SupportedModels.MediaPipeSelfieSegmentation, {
+                    runtime: 'tfjs',
+                    modelType: 'general'
                 });
-                
                 hideLoading();
-            } catch (error) {
-                showError('Failed to initialize the AI model. Please refresh the page and try again.');
-                console.error('Model loading error:', error);
+            } catch (err) {
+                showError('Failed to load AI model. Please refresh and try again.');
+                console.error('Model loading error:', err);
             }
         }
 
-        function loadScript(url) {
-            return new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = url;
-                script.onload = resolve;
-                script.onerror = reject;
-                document.head.appendChild(script);
-            });
-        }
-
-        function updateProgress(percent) {
-            progressBar.style.width = `${percent}%`;
-        }
-
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            uploadArea.classList.add('active');
-        }
-
-        function handleDragLeave(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            uploadArea.classList.remove('active');
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            uploadArea.classList.remove('active');
-
-            const files = e.dataTransfer.files;
-            if (files.length > 0 && files[0].type.match('image.*')) {
-                fileInput.files = files;
-                handleFileSelect({ target: fileInput });
-            }
-        }
-
-        function handleFileSelect(e) {
-            const file = e.target.files[0];
+        async function handleFileSelect() {
+            const file = fileInput.files[0];
             if (!file) return;
 
             // Validate file
@@ -476,34 +261,26 @@
                 showError('Please select an image file (JPEG or PNG)');
                 return;
             }
-
             if (file.size > 5 * 1024 * 1024) {
-                showError('Image size should be less than 5MB');
+                showError('Image must be smaller than 5MB');
                 return;
             }
 
             const reader = new FileReader();
-            reader.onload = async (event) => {
-                try {
-                    const img = new Image();
-                    img.onload = async () => {
-                        // Check dimensions
-                        if (img.width > 2000 || img.height > 2000) {
-                            showError('Image dimensions should be less than 2000x2000 pixels');
-                            return;
-                        }
-
-                        originalImage.src = event.target.result;
-                        await processImage(img);
-                    };
-                    img.onerror = () => {
-                        showError('Error loading image');
-                    };
-                    img.src = event.target.result;
-                } catch (error) {
-                    showError('Error processing image');
-                    console.error('Image processing error:', error);
-                }
+            reader.onload = async (e) => {
+                const img = new Image();
+                img.onload = async () => {
+                    if (img.width > 2000 || img.height > 2000) {
+                        showError('Image dimensions must be under 2000x2000px');
+                        return;
+                    }
+                    originalImage.src = e.target.result;
+                    await processImage(img);
+                };
+                img.onerror = () => {
+                    showError('Error loading image');
+                };
+                img.src = e.target.result;
             };
             reader.onerror = () => {
                 showError('Error reading file');
@@ -525,28 +302,29 @@
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0);
                 
-                // Process with BodyPix
-                updateProgress(60);
-                loadingText.textContent = 'Processing image...';
-                
-                const segmentation = await model.segmentPerson(canvas, {
+                // Process with segmentation model
+                const segmentationConfig = {
                     flipHorizontal: false,
-                    internalResolution: 'high',
-                    segmentationThreshold: 0.7
-                });
+                    multiSegmentation: false,
+                    segmentBodyParts: false
+                };
+                
+                const segmentation = await model.segmentPeople(canvas, segmentationConfig);
                 
                 // Create mask
-                updateProgress(80);
-                loadingText.textContent = 'Creating mask...';
-                
-                const mask = bodyPix.toMask(segmentation);
-                const opacity = 1;
-                const maskBlurAmount = 1;
-                const flipHorizontal = false;
+                const foregroundColor = {r: 0, g: 0, b: 0, a: 0}; // Transparent
+                const backgroundColor = {r: 0, g: 0, b: 0, a: 255}; // Opaque
+                const backgroundDarkeningMask = await bodySegmentation.toBinaryMask(
+                    segmentation, foregroundColor, backgroundColor
+                );
                 
                 // Apply mask to original image
-                bodyPix.drawMask(
-                    canvas, canvas, mask, opacity, maskBlurAmount, flipHorizontal
+                const opacity = 1;
+                const maskBlurAmount = 3;
+                const flipHorizontal = false;
+                
+                await bodySegmentation.drawMask(
+                    canvas, canvas, backgroundDarkeningMask, opacity, maskBlurAmount, flipHorizontal
                 );
                 
                 // Convert to transparent PNG
@@ -562,18 +340,15 @@
                 
                 ctx.putImageData(imageData, 0, 0);
                 
-                // Display result
+                // Show result
                 resultImage.src = canvas.toDataURL('image/png');
-                resultContainer.style.display = 'block';
-                uploadArea.style.display = 'none';
-                
+                resultArea.style.display = 'block';
                 hideLoading();
                 isProcessing = false;
-            } catch (error) {
-                showError('Background removal failed. Please try another image.');
-                hideLoading();
+            } catch (err) {
+                showError('Background removal failed. Try a different image.');
+                console.error('Processing error:', err);
                 isProcessing = false;
-                console.error('Processing error:', error);
             }
         }
 
@@ -588,29 +363,30 @@
             document.body.removeChild(link);
         }
 
-        function resetTool() {
+        function reset() {
             fileInput.value = '';
-            resultContainer.style.display = 'none';
-            uploadArea.style.display = 'block';
+            resultArea.style.display = 'none';
             hideError();
         }
 
-        function showLoading(message) {
-            loadingText.textContent = message;
-            loadingOverlay.style.display = 'flex';
+        function showLoading(text) {
+            loadingText.textContent = text;
+            loading.style.display = 'block';
+            error.style.display = 'none';
         }
 
         function hideLoading() {
-            loadingOverlay.style.display = 'none';
+            loading.style.display = 'none';
         }
 
         function showError(message) {
-            errorMessage.textContent = message;
-            errorMessage.style.display = 'block';
+            error.textContent = message;
+            error.style.display = 'block';
+            hideLoading();
         }
 
         function hideError() {
-            errorMessage.style.display = 'none';
+            error.style.display = 'none';
         }
     </script>
 </body>
