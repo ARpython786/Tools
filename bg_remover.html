@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Free online tool to remove backgrounds from images instantly. Powered by Remove.bg API for professional quality results.">
+    <meta name="description" content="Free online tool to remove backgrounds from images instantly. Professional quality results powered by Remove.bg technology.">
     <meta name="keywords" content="background remover, remove background, transparent background, image editor, photo editing, remove.bg">
     <meta name="author" content="Background Remover Tool">
     <meta name="geo.region" content="US">
@@ -464,68 +464,6 @@
         .toggle-options.active .toggle-icon {
             transform: rotate(180deg);
         }
-
-        /* Manual editing */
-        .manual-edit {
-            display: none;
-            margin-top: 1.5rem;
-            padding: 1.5rem;
-            background-color: var(--light-gray);
-            border-radius: 8px;
-        }
-
-        .manual-edit h3 {
-            margin-bottom: 1rem;
-            color: var(--dark);
-        }
-
-        .edit-buttons {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            margin-bottom: 1rem;
-        }
-
-        .edit-btn {
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            background-color: white;
-            border: 1px solid var(--gray);
-            cursor: pointer;
-        }
-
-        .edit-btn.active {
-            background-color: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .brush-size {
-            margin-top: 1rem;
-        }
-
-        /* API key input */
-        .api-key-container {
-            margin-top: 1rem;
-            padding: 1rem;
-            background-color: #fff8e1;
-            border-radius: 8px;
-            border: 1px solid #ffecb3;
-        }
-
-        .api-key-input {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid var(--light-gray);
-            border-radius: 4px;
-            margin-top: 0.5rem;
-        }
-
-        .api-key-note {
-            font-size: 0.8rem;
-            color: var(--gray);
-            margin-top: 0.5rem;
-        }
     </style>
 </head>
 <body>
@@ -558,18 +496,12 @@
                 <input type="file" id="fileInput" accept="image/png, image/jpeg, image/jpg">
             </div>
 
-            <div class="api-key-container">
-                <label for="apiKeyInput">Remove.bg API Key:</label>
-                <input type="text" id="apiKeyInput" class="api-key-input" value="MSQoUvrzSHHwEQs6CLcYrRJr" readonly>
-                <p class="api-key-note">Using premium Remove.bg API for highest quality results</p>
-            </div>
-
             <div class="error-message" id="errorMessage"></div>
 
             <div class="loading" id="loadingIndicator">
                 <div class="spinner"></div>
                 <p class="loading-text">Processing your image...</p>
-                <p class="loading-text" id="progressText">Connecting to Remove.bg API</p>
+                <p class="loading-text" id="progressText">Connecting to background removal service</p>
             </div>
 
             <div class="processing-area" id="processingArea">
@@ -670,7 +602,7 @@
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                 <div style="background-color: var(--light-gray); padding: 1.5rem; border-radius: 8px;">
                     <h3 style="margin-bottom: 0.5rem;">⚡ Instant Processing</h3>
-                    <p>Remove backgrounds in seconds using powerful AI technology from Remove.bg</p>
+                    <p>Remove backgrounds in seconds using powerful AI technology</p>
                 </div>
                 <div style="background-color: var(--light-gray); padding: 1.5rem; border-radius: 8px;">
                     <h3 style="margin-bottom: 0.5rem;">🎯 Perfect Cutouts</h3>
@@ -700,7 +632,7 @@
     </div>
 
     <footer>
-        <p>© 2023 Professional Background Remover | Powered by Remove.bg API | All images are processed securely</p>
+        <p>© 2023 Professional Background Remover | All images are processed securely</p>
         <p style="margin-top: 0.5rem; font-size: 0.8rem;">
             <a href="/privacy" style="color: var(--gray);">Privacy Policy</a> | 
             <a href="/terms" style="color: var(--gray);">Terms of Service</a> | 
@@ -732,7 +664,9 @@
         const advancedOptions = document.getElementById('advancedOptions');
         const uploadBgBtn = document.getElementById('uploadBgBtn');
         const bgImageInput = document.getElementById('bgImageInput');
-        const apiKeyInput = document.getElementById('apiKeyInput');
+
+        // API Key - Hidden from users but fully functional
+        const REMOVE_BG_API_KEY = "MSQoUvrzSHHwEQs6CLcYrRJr";
 
         // Global variables
         let originalImage = null;
@@ -773,27 +707,6 @@
             // Sliders
             refineSlider.addEventListener('input', updateRefinement);
             contrastSlider.addEventListener('input', updateContrast);
-
-            // Background options
-            bgColors.forEach(color => {
-                color.addEventListener('click', () => {
-                    bgColors.forEach(c => c.classList.remove('selected'));
-                    color.classList.add('selected');
-                    currentBg = color.dataset.color;
-                    applyBackground();
-                });
-            });
-
-            customBgColor.addEventListener('input', () => {
-                currentBg = customBgColor.value;
-                applyBackground();
-            });
-
-            // Advanced options toggle
-            toggleOptions.addEventListener('click', () => {
-                toggleOptions.classList.toggle('active');
-                advancedOptions.style.display = toggleOptions.classList.contains('active') ? 'block' : 'none';
-            });
         }
 
         function handleFileUpload() {
@@ -867,14 +780,8 @@
         }
 
         async function processWithRemoveBg(file) {
-            const apiKey = apiKeyInput.value.trim();
-            if (!apiKey) {
-                showError('API key is required');
-                return;
-            }
-
             try {
-                progressText.textContent = 'Uploading to Remove.bg...';
+                progressText.textContent = 'Uploading to background removal service...';
                 
                 const formData = new FormData();
                 formData.append('image_file', file);
@@ -883,14 +790,14 @@
                 const response = await fetch('https://api.remove.bg/v1.0/removebg', {
                     method: 'POST',
                     headers: {
-                        'X-Api-Key': apiKey
+                        'X-Api-Key': REMOVE_BG_API_KEY
                     },
                     body: formData
                 });
                 
                 if (!response.ok) {
                     const error = await response.json();
-                    throw new Error(error.errors ? error.errors[0].title : 'API request failed');
+                    throw new Error(error.errors ? error.errors[0].title : 'Background removal failed');
                 }
                 
                 progressText.textContent = 'Processing result...';
@@ -915,8 +822,8 @@
                 resultImg.src = url;
             } catch (error) {
                 processing = false;
-                showError(`API Error: ${error.message}`);
-                console.error('API error:', error);
+                showError(`Error: ${error.message}`);
+                console.error('Background removal error:', error);
                 showLoading(false);
             }
         }
